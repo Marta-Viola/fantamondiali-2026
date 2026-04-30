@@ -32,6 +32,8 @@ export async function syncMatches() {
             id: m.id,
             home_team: m.homeTeam.name,
             away_team: m.awayTeam.name,
+            home_tla: m.homeTeam.tla,
+            away_tla: m.awayTeam.tla,
             home_flag: m.homeTeam.crest || null,
             away_flag: m.awayTeam.crest || null,
             match_time: m.utcDate,

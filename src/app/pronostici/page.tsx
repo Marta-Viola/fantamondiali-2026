@@ -1,6 +1,24 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import PredictionForm from '@/components/PredictionForm'
+import PredictionForm from '../../components/PredictionForm'
+
+// function DeadlineBanner() {
+//     return (
+//         <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl shadow-sm animate-pulse-subtle">
+//             <div className="flex items-center gap-3">
+//                 <span className="text-2xl">⏳</span>
+//                 <div>
+//                     <h3 className="text-amber-800 font-black uppercase text-sm tracking-tight">Attenzione Scadenze</h3>
+//                     <p className="text-amber-700 text-xs ,t-1">
+//                         Puoi salvare i pronostici parzialmente e tornare dopo.
+//                         <br />
+//                         <strong>IMPORTANTE:</strong> Ogni partita verrà bloccata all'inizio del match (Gironi: dal 11/06).
+//                     </p>
+//                 </div>
+//             </div>
+//         </div>
+//     )
+// }
 
 export default async function PronosticiPage() {
     const supabase = await createClient()
