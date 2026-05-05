@@ -62,6 +62,13 @@ export default async function Home() {
             </button>
           </Link>
 
+          <Link href="/side-bets">
+            <button className="w-full bg-white border-2 border-emerald-600 text-emerald-600 p-5 rounded-2xl font-black uppercase flex items-center justify-between hover:bg-emerald-50 transition-all shadow-sm">
+              <span>⭐ Gestisci Scommesse Speciali</span>
+              <span className="text-xl">→</span>
+            </button>
+          </Link>
+
           <button className="w-full bg-slate-200 text-slate-500 p-5 rounded-2xl font-black uppercase flex items-center justify-between cursor-not-allowed opacity-60">
             <span>📊 Classifica Generale</span>
             <span className="text-xs font-bold">Prossimamente</span>

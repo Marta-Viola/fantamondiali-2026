@@ -4,6 +4,9 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { savePredictions } from '@/app/actions/save-predictions'
 
+import ConfirmButton from '@/components/ui/ConfirmButton'
+import StandardModal from '@/components/ui/StandardModal'
+
 export default function PredictionForm({ matches, existingPredictions }: any) {
     const [loading, setLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -148,7 +151,15 @@ export default function PredictionForm({ matches, existingPredictions }: any) {
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            <div className="fixed bottom-8 left-0 right-0 flex justify-center px-6 pointer-events-none z-50">
+            <ConfirmButton
+                text="Salva Scommesse"
+                icon="💾"
+                onClick={() => setIsModalOpen(true)}
+                loading={loading}
+                isFloating={true}
+            />
+            
+            {/* <div className="fixed bottom-8 left-0 right-0 flex justify-center px-6 pointer-events-none z-50">
                 <button
                     onClick={handleConfirmClick}
                     className="pointer-events-auto w-full max-w-[280px] sm:max-w-md bg-emerald-600/95 backdrop-blur-sm text-white py-4 rounded-full font-black uppercase shadow-[0_15px_30px_rgba(5,150,105,0.4)] hover:bg-emerald-700 hover:-translate-y-1 active:scale-95 disabled:bg-slate-400 transition-all flex items-center justify-center gap-3 border border-emerald-400/30 ring-white/10"
@@ -162,50 +173,62 @@ export default function PredictionForm({ matches, existingPredictions }: any) {
                         </div>
                     )}
                 </button>
-            </div>
+            </div> */}
             
             {/* POP-UP */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    {/* sfondo oscurato */}
-                    <div
-                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-                        onClick={() => setIsModalOpen(false)}
-                    ></div>
+                <StandardModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onConfirm={onFinalSave}
+                    loading={loading}
+                    emoji="⚽"
+                    title="Quasi fatto!"
+                    description={
+                        <>Hai tempo fino al <span className="font-bold text-emerald-600">10 giugno</span> per modificare i tuoi pronostici.</>
+                    }
+                />
 
-                    {/* Contenuto modale */}
-                    <div className="relative bg-white w-full max-w-dm rounded-3xl shadow-wxl overflow-hidden animate-in fade-in zoom-in duration-200">
-                        {/* bottone x in alto a destra */}
-                        <button
-                            onClick={() => setIsModalOpen(false)}
-                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                // <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                //     {/* sfondo oscurato */}
+                //     <div
+                //         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                //         onClick={() => setIsModalOpen(false)}
+                //     ></div>
 
-                        <div className="p-8 pt-10 text-center">
-                            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                                ⚽
-                            </div>
-                            <h3 className="text-xl font-black text-slate-800 uppercase mb-2">
-                                Quasi fatto!
-                            </h3>
-                            <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                                I tuoi pronostici verranno salvati ora. Potrai modificarli tutte le volte che vuoi fino al <span className="font-bold text-emerald-600 underline">11 Giugno alle 18:00</span>.
-                            </p>
+                //     {/* Contenuto modale */}
+                //     <div className="relative bg-white w-full max-w-dm rounded-3xl shadow-wxl overflow-hidden animate-in fade-in zoom-in duration-200">
+                //         {/* bottone x in alto a destra */}
+                //         <button
+                //             onClick={() => setIsModalOpen(false)}
+                //             className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2"
+                //         >
+                //             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                //                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                //             </svg>
+                //         </button>
 
-                            <button
-                                onClick={onFinalSave}
-                                className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:bg-emerald-700 active:scale-95 transition-all"       
-                            >
-                                Ho Capito, Salva!
-                            </button>
+                //         <div className="p-8 pt-10 text-center">
+                //             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                //                 ⚽
+                //             </div>
+                //             <h3 className="text-xl font-black text-slate-800 uppercase mb-2">
+                //                 Quasi fatto!
+                //             </h3>
+                //             <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                //                 I tuoi pronostici verranno salvati ora. Potrai modificarli tutte le volte che vuoi fino al <span className="font-bold text-emerald-600 underline">11 Giugno alle 18:00</span>.
+                //             </p>
 
-                        </div>
-                    </div>
-                </div>
+                //             <button
+                //                 onClick={onFinalSave}
+                //                 className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase shadow-lg hover:bg-emerald-700 active:scale-95 transition-all"       
+                //             >
+                //                 Ho Capito, Salva!
+                //             </button>
+
+                //         </div>
+                //     </div>
+                // </div>
             )}
         </div>
     )

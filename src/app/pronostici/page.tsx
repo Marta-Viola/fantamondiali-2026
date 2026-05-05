@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+
 import PredictionForm from '../../components/PredictionForm'
+import StandardHeader from '@/components/ui/StandardHeader'
+
 
 // function DeadlineBanner() {
 //     return (
@@ -41,10 +44,15 @@ export default async function PronosticiPage() {
 
     return (
         <div className="min-h-screen bg-emerald-50 pb-20">
-            <header className="bg-emerald-600 text-white p-6 sticky top-0 z-10 shadow-md">
+            <StandardHeader
+                title="Fase a Gironi ⚽"
+                subtitle="Tutti i match del primo turno"
+            />
+            
+            {/* <header className="bg-emerald-600 text-white p-6 sticky top-0 z-10 shadow-md">
                 <h1 className="text-2xl font-black uppercase text-center italic">Fase a Gironi ⚽</h1>
                 <p className="text-center text-emerald-100 text-xs">Tutti i match del primo turno</p>
-            </header>
+            </header> */}
 
             <main className="max-w-2xl mx-auto p-4">
                 <PredictionForm
