@@ -35,7 +35,7 @@ export default function ConfirmButton({
 
     if (isFloating) {
         return (
-            <div className="fixed bottom-8 left-0 right-0 flex justify-center px-6 pointer-events-none z-50">
+            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full flex justify-center px-6 pointer-events-none z-50">
                 {buttonContent}
             </div>
         );

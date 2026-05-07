@@ -43,11 +43,13 @@ export default async function PronosticiPage() {
         .eq('user_id', user.id)
 
     return (
-        <div className="min-h-screen bg-emerald-50 pb-20">
-            <StandardHeader
+        <>
+        <StandardHeader
                 title="Fase a Gironi ⚽"
                 subtitle="Tutti i match del primo turno"
             />
+        <div className="min-h-screen bg-emerald-50 pb-20">
+            
             
             {/* <header className="bg-emerald-600 text-white p-6 sticky top-0 z-10 shadow-md">
                 <h1 className="text-2xl font-black uppercase text-center italic">Fase a Gironi ⚽</h1>
@@ -61,5 +63,6 @@ export default async function PronosticiPage() {
                 />
             </main>
         </div>
+        </>
     )
 }

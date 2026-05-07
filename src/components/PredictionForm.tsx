@@ -72,10 +72,10 @@ export default function PredictionForm({ matches, existingPredictions }: any) {
     const percentage = Math.round((completedCount / totalCount) * 100);
 
     return (
-        <div className="pb-32">
+        <div className="w-full max-w-2xl mx-auto px-4 mt-8 space-y-12">
             {/* Progress Bar */}
-            <div className="sticky top-[72px] z-30 w-full max-w-2xl mx-auto px-4 mb-4">
-                <div className="bg-white/80 backdrop-blur-md border border-emerald-100 p-4 rounded-3xl shadow-sm">
+            <div className="sticky top-24 z-30 w-full max-w-2xl mx-auto px-4 mb-4">
+                <div className="bg-white/90 backdrop-blur-md border border-emerald-100 p-4 rounded-3xl shadow-lg">
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                             <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">
@@ -127,7 +127,7 @@ export default function PredictionForm({ matches, existingPredictions }: any) {
                                 value={values[match.id].home}
                                 onChange={(e) => handleInputChange(match.id, 'home', e.target.value, i * 2)}
                             />
-                            <span className="text-emerald-300 font-black px-1">/</span>
+                            <span className="text-emerald-300 font-black px-1">-</span>
                             <input
                                 ref={(el) => {(inputsRef.current[i * 2 + 1] = el)}}
                                 type="text"

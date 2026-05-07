@@ -11,7 +11,7 @@ interface Bet {
     id: string
     label: string
     points_value: number
-    type: 'team' | 'player'
+    type: 'team' | 'player' | 'score'
 }
 
 interface InitialAnswer {
@@ -41,6 +41,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
 
     // identifichiamo gli ID per l'automazione (basandoci sulle label)
     const winnerBet = bets.find((b) => b.label.startsWith('Vincitore'))
+    const finalScoreBet = bets.find((b) => b.type === 'score')
     const finalistBets = bets.filter((b) => b.label.startsWith('Finalista'))
     const semiBets = bets.filter((b: any) => b.label.startsWith('Semifinalista'))
     const topScorerBet = bets.find((b) => b.label.startsWith('Capocannoniere'))
@@ -69,7 +70,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
         // setAnswers(newAnswers)
     }
 
-    const TeamSelect = ({ bet, isBig = false }: { bet: any, isBig?: boolean }) => {
+    const TeamSelect = ({ bet, isBig = false, forceTla = false }: { bet: any, isBig?: boolean, forceTla?: boolean }) => {
         const [isOpen, setIsOpen] = useState(false)
         const [searchTerm, setSearchTerm] = useState("")
         const selectedTeam = teams.find((t: any) => t.name === answers[bet.id])
@@ -87,24 +88,34 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                         setIsOpen(!isOpen)
                         setSearchTerm("")
                     }}
-                    className={`w-full bg-slate-50 border-2 border-transparent rounded-2xl font-bold text-slate-800 transition-all outline-none flex items-center justify-between
+                    className={`w-full bg-slate-50 border-2 border-transparent rounded-2xl font-bold text-slate-800 transition-all outline-none flex items-center justify-center relative
                         ${isOpen ? 'border-emerald-500 bg-white shadow-md' : 'hover:bg-slate-100'} 
                         ${isBig ? 'p-5 text-2xl' : 'p-4 text-sm'}`}
                 >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 justify-center">
                         {selectedTeam ? (
                             <>
                                 <img src={selectedTeam.flag} alt="flag" className={`object-cover rounded-sm shadow-sm ${isBig ? 'w-10 h-6' : 'w-6 h-4'}`} />
-                                <span className="truncate">{selectedTeam.name}</span>
+                                {/* nome intero sempre visibile su desktop */}
+                                <span className="truncate hidden sm:block">{selectedTeam.name}</span>
+                                {/* nome su mobile abbreviato solo se forceTla è vero, altrimenti intero */}
+                                <span className="sm:hidden block uppercase tracking-tighter">
+                                    {forceTla
+                                        ? (selectedTeam.tla || selectedTeam.name.substring(0, 3))
+                                        : selectedTeam.name
+                                    }
+                                </span>
                             </>
                         ) : (
                             <span className="text-slate-400 font-medium">{isBig ? 'Scegli il Campione' : 'Seleziona...'}</span>
                         )}
                     </div>
                     {/* Freccetta */}
-                    <svg className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <div className="absoulte right-4">
+                        <svg className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
                 </button>
 
                 {/* lista a tendina personalizzata con bandiere */}
@@ -175,7 +186,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
     }
     
     return (
-        <div className="space-y-12 pb-20">
+        <div className="w-full max-w-2xl mx-auto px-4 mt-8 space-y-12">
 
             {/*  SEZIONE SEMIFINALI */}
             <section className="relative z-30">
@@ -188,7 +199,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                             <span className="text-[9px] font-black text-emerald-600 uppercase mb-2 block">
                                 Semifinalista {idx + 1}
                             </span>
-                            <TeamSelect bet={bet} />
+                            <TeamSelect bet={bet} forceTla={true} />
                         </div>
                     ))}
                 </div>
@@ -208,7 +219,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                             <TeamSelect bet={bet} />
                         </div>
                     ))}
-                    <div className="hidden sm:flex absolute left-1/2 top-[60%] -translate-x-1/2 -translate-y-1/2 bg-slate-800 text-white w-10 h-10 rounded-full items-center justify-center font-black text-xs border-4 border-white z-10">
+                    <div className="flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 text-white w-10 h-10 rounded-full items-center justify-center font-black text-xs border-4 border-emerald-50 z-30 shadow-md">
                         VS
                     </div>
                 </div>
@@ -217,12 +228,70 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
             {/* SEZIONE VINCITORE */}
             <section className="text-center relative z-10">
                 <h2 className="text-xl font-black uppercase tracking-tighter mb-4 text-slate-800">
-                    🏆 Chi vince il mondiale?
+                    🏆 Il Gran Finale
                 </h2>
+
                 {winnerBet && (
-                    <div className="bg-gradient-to-b from-amber-50 to-white p-8 rounded-[3rem] border-4 border-amber-400 shadow-[0_20px_50px_rgba(251,191,36,0.2)] relative">
+                    <div className="bg-gradient-to-b from-amber-50 to-white p-8 rounded-[3rem] border-4 border-amber-400 shadow-[0_20px_50px_rgba(251,191,36,0.2)] relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl pointer-events-none">✨</div>
-                        <TeamSelect bet={winnerBet} isBig={true} />
+
+                        {/* sezione vincitore */}
+                        <div className="mb-8">
+                            <p className="text-[10px] font-black uppercase text-amber-600 mb-4 tracking-widest">Chi alzerà la coppa?</p>
+                            <TeamSelect bet={winnerBet} isBig={true} />
+                        </div>
+
+                        {/* risultato esatto */}
+                        {finalScoreBet && (
+                            <div className="pt-6 border-t-2 border-amber-200/50 relative z-10">
+                                <p className="text-[10px] font-black uppercase text-amber-600 mb-4 tracking-widest">
+                                    {finalScoreBet.label}
+                                </p>
+
+                                <div className="flex items-center justify-center gap-4">
+                                    {/* input casa */}
+                                    <input
+                                        type="number"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={(answers[finalScoreBet.id] || "0-0").split("-")[0]}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, "") || "0"
+                                            const current = (answers[finalScoreBet.id] || "0-0").split("-")
+                                            setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${val}-${current[1]}` }))
+                                        }}
+                                        className="w-16 h-14 bg-white border-2 border-amber-200 rounded-2xl font-black text-2xl text-center text-slate-800 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all shadow-inner p-0"
+                                    />
+
+                                    <span className="text-2xl font-black text-amber-400">-</span>
+
+                                    {/* input ospite */}
+                                    <input
+                                        type="number"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={(answers[finalScoreBet.id] || "0-0").split("-")[1]}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, "") || "0"
+                                            const current = (answers[finalScoreBet.id] || "0-0").split("-")
+                                            setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${current[0]}-${val}` }))
+                                        }}
+                                        className="w-16 h-14 bg-white border-2 border-amber-200 rounded-2xl font-black text-2xl text-center text-slate-800 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all shadow-inner p-0"
+                                    />
+                                    
+                                    {/* <input
+                                        type="text"
+                                        placeholder="0 - 0"
+                                        value={answers[finalScoreBet.id] || ''}
+                                        onChange={(e) => setAnswers(prev => ({ ...prev, [finalScoreBet.id]: e.target.value }))}
+                                        className="w-full bg-white border-2 border-amber-200 rounded-2xl px-4 py-3 font-black text-2xl text-center text-slate-800 placeholder:text-slate-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 outline-none transition-all shadow-inner"
+                                    /> */}
+                                    
+                                </div>
+                            </div>
+                        )}
+
+                        
                     </div>
                 )}
             </section>
@@ -255,17 +324,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                 isFloating={false}
             />
 
-            {/* <div className="pt-6">
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    disabled={loading}
-                    className="w-full bg-emerald-600 text-white py-6 rounded-[2.5rem] font-black uppercase shadow-2xl hover:bg-emerald-700 active:scale-95 transition-all disabled:bg-slate-300"
-                >
-                    {loading ? 'Salvataggio...' : 'Conferma Tutto'}
-                </button>
-            </div> */}
-            
-
             {/* POP-UP DI CONFERMA */}
             {isModalOpen && (
                 <StandardModal
@@ -279,29 +337,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                         <>Hai tempo fino al <span className="font-bold text-emerald-600">10 giugno</span> per modificare i tuoi pronostici speciali.</>
                     }
                 />
-
-                // <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                //     <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-                //     <div className="relative bg-white w-full max-w-sm rounded-[3rem] p-10 text-center shadow-2xl animate-in zoom-in duration-300">
-                //         {/* X di chiusura */}
-                //         <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-slate-300 hover:text-slate-500 transition-colors">
-                //             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
-                //         </button>
-
-                //         <div className="text-5xl mb-6">⭐</div>
-                //         <h3 className="text-2xl font-black uppercase text-slate-800 mb-2">Sei Sicuro?</h3>
-                //         <p className="text-slate-500 text-sm mb-8">
-                //             Queste scelte sono il tuo destino. Hai tempo fino al <span className="font-bold text-emerald-600">10 giugno</span> per ripensarci.
-                //         </p>
-                //         <button 
-                //             onClick={handleSave}
-                //             disabled={loading}
-                //             className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase"
-                //         >
-                //             {loading ? 'Salvataggio...' : 'Sì, conferma!'}
-                //         </button>
-                //     </div>
-                // </div>
             )}
         </div>
     )

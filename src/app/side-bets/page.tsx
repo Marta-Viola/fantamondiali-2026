@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import StandardHeader from '@/components/ui/StandardHeader'
+import StandardMain from '@/components/ui/StandardMain'
 import SideBetsForm from '@/components/SideBetsForm'
 
 export default async function SideBetsPage() {
@@ -39,11 +40,13 @@ export default async function SideBetsPage() {
     const totalTeamsFound = teams.length
     
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            <StandardHeader
+        <>
+        <StandardHeader
                 title="Scommesse Speciali ⭐"
                 subtitle="Indovina il futuro del Mondiale e scala la classifica"
             />
+        <div className="min-h-screen bg-slate-50 pb-20">
+            
             
             {/* <header className="bg-emerald-600 text-white p-8 sticky top-0 z-40 shadow-md">
                 <h1 className="text-2xl font-black uppercase italic text-center">Scommesse Speciali ⭐</h1>
@@ -68,5 +71,6 @@ export default async function SideBetsPage() {
                 )}
             </main>
         </div>
+        </>
     )
 }
