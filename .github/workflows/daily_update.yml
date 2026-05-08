@@ -1,0 +1,17 @@
+name: Daily Results Update
+
+on:
+  schedule:
+    # 07:15 UTC = 09:15 italiane
+    - cron: '15 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping_supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Edge Function
+        run: |
+          curl -i -X POST https://kqybtwmlvpaszzzomyzb.supabase.co/functions/v1/update-results \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          -H "Content-Type: application/json"
