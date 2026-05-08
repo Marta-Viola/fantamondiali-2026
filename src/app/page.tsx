@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { syncMatches } from './actions/sync-matches'
+import RankingWidget from '@/components/RankingWidget'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -34,6 +35,12 @@ export default async function Home() {
     }
   }
 
+  const { data: rankings } = await supabase
+    .from('profiles')
+    .select('id, username, total_points, previous_rank')
+    .order('total_points', { ascending: false })
+    .limit(5)
+
   // se l'utente c'è, mostriamo la Dashboard (temporanea)
   return (
     <main className="min-h-screen bg-slate-50">
@@ -55,7 +62,7 @@ export default async function Home() {
 
         {/* pulsanti azione principale */}
         <div className="grid gap-4">
-          <Link href="/pronostici">
+          {/* <Link href="/pronostici">
             <button className="w-full bg-white border-2 border-emerald-600 text-emerald-600 p-5 rounded-2xl font-black uppercase flex items-center justify-between hover:bg-emerald-50 transition-all shadow-sm">
               <span>⚽ Gestisci Pronostici</span>
               <span className="text-xl">→</span>
@@ -67,12 +74,15 @@ export default async function Home() {
               <span>⭐ Gestisci Scommesse Speciali</span>
               <span className="text-xl">→</span>
             </button>
-          </Link>
+          </Link> */}
 
-          <button className="w-full bg-slate-200 text-slate-500 p-5 rounded-2xl font-black uppercase flex items-center justify-between cursor-not-allowed opacity-60">
+          {/* widget classifica */}
+          <RankingWidget users={rankings || []}/>
+
+          {/* <button className="w-full bg-slate-200 text-slate-500 p-5 rounded-2xl font-black uppercase flex items-center justify-between cursor-not-allowed opacity-60">
             <span>📊 Classifica Generale</span>
             <span className="text-xs font-bold">Prossimamente</span>
-          </button>
+          </button> */}
         </div>
 
         {/* Sezione Admin temporanea */}
