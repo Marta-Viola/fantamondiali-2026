@@ -14,8 +14,10 @@ export default async function ClassificaPage() {
 
     const { data: rankings } = await supabase
         .from('profiles')
-        .select('id, username, total_points, outcomes_count, scores_count, previous_rank')
+        .select('*')
         .order('total_points', { ascending: false })
+        .order('scores_count', { ascending: false })
+        .order('gd_count', { ascending: false })
         .order('username', { ascending: true })
 
     return (

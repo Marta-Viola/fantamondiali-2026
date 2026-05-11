@@ -16,36 +16,47 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                 {topFive.map((user, index) => {
                     const isMe = user.id === currentUserId
                     const rank = index + 1
-                    // const diff = user.previous_rank ? user.previous_rank - rank : 0
+                    const hasPoints = user.total_points > 0
 
                     let badgeColor = "bg-slate-100 text-slate-400"
-                    if (index === 0) badgeColor = "bg-amber-400 text-white"
-                    if (index === 1) badgeColor = "bg-slate-300 text-slate-600"
-                    if (index === 2) badgeColor = "bg-orange-500 text-white"
+
+                    if (hasPoints) {
+                        if (index === 0) badgeColor = "bg-amber-400 text-white"
+                        if (index === 1) badgeColor = "bg-slate-300 text-slate-600"
+                        if (index === 2) badgeColor = "bg-orange-500 text-white"
+                    }
 
                     return (
-                        <div key={user.id} className={`flex items-center justify-between p-3 rounded-2xl border ${isMe ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-100'}`}>
+                        <div
+                            key={user.id}
+                            className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                                isMe
+                                ? 'bg-emerald-50 border-emerald-200 shadow-sm'
+                                : 'bg-slate-50 border-slate-100'
+                            }`}
+                        >
                             <div className="flex items-center gap-3">
-                                {/* <div className="flex flex-col items-center min-w-[20px]"> */}
-                                    <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black ${badgeColor}`}>
-                                        {rank}
-                                    </span>
-                                    <span className={`text-sm truncate max-w-[100px] ${isMe ? 'font-black text-emerald-700' : 'font-bold text-slate-700'}`}>
-                                        {user.username} {isMe && "(Tu"}
-                                    </span>
-                                    {/* {diff > 0 && <span className="text-emerald-500 text-[8px]">▲</span>}
-                                    {diff < 0 && <span className="text-rose-500 text-[8px]">▼</span>}
-                                </div> */}
-                                {/* <span className="font-bold text-sm text-slate-700 truncate max-w-[120px]">
-                                    {user.username}
-                                </span> */}
-                            </div>
-                            {/* <div className="flex items-center gap-1"> */}
-                                <span className={`font-black text-sm ${isMe ? 'text-emerald-600' : 'text-slate-800'}`}>
-                                    {user.total_points} <span className="text-[9px] opacity-50 font-black">PT</span>
+                                <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black ${badgeColor}`}>
+                                    {hasPoints ? rank : '-'}
                                 </span>
                                 
-                            {/* </div> */}
+
+                                <span className={`text-sm ${isMe ? 'font-black text-emerald-700' : 'font-bold text-slate-700'}`}>
+                                    {user.username || 'Giocatore'}
+                                </span>
+                                {isMe && 
+                                    <span className="text-[7px] sm:text-[9px] bg-emerald-200 text-emerald-700 px-1 w-fit rounded font-black uppercase">
+                                        Tu
+                                    </span>}
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                                <span className={`font-black text-sm ${isMe ? 'text-emerald-600' : 'text-slate-800'}`}>
+                                    {user.total_points}
+                                </span>
+                                <span className="text-[9px] opacity-40 font-black uppercase tracking-tighter">PT</span>
+                            </div>
+
                         </div>
                     )
                 })}

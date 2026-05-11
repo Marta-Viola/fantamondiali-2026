@@ -37,8 +37,11 @@ export default async function Home() {
 
   const { data: rankings } = await supabase
     .from('profiles')
-    .select('id, username, total_points, previous_rank')
+    .select('*')
     .order('total_points', { ascending: false })
+    .order('scores_count', { ascending: false })
+    .order('gd_count', { ascending: false })
+    .order('username', { ascending: true })
     .limit(5)
 
   // se l'utente c'è, mostriamo la Dashboard (temporanea)
@@ -77,7 +80,7 @@ export default async function Home() {
           </Link> */}
 
           {/* widget classifica */}
-          <RankingWidget users={rankings || []}/>
+          <RankingWidget users={rankings || []} currentUserId={user.id} />
 
           {/* <button className="w-full bg-slate-200 text-slate-500 p-5 rounded-2xl font-black uppercase flex items-center justify-between cursor-not-allowed opacity-60">
             <span>📊 Classifica Generale</span>
