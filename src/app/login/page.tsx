@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useState } from 'react'
 
 export default function LoginPage() {
-    const [isRegistering, setIsRegistering] = useState(false)   // stato per swithcare tra Login e Register
+    const [isRegistering, setIsRegistering] = useState(true)   // stato per swithcare tra Login e Register
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
     const [fullName, setFullName] = useState('')
@@ -19,14 +19,65 @@ export default function LoginPage() {
         setLoading(true)
         setMessage('')
 
+        let finalUsername = username.trim()
+
+        // CONTROLLI DI SICUREZZA E VALIDAZIONE
+        if (isRegistering) {
+            // Limite lunghezza
+            if (finalUsername.length > 15) {
+                setMessage('Errore: Il nickname è troppo lungo (max 15 caratteri)')
+                setLoading(false)
+                return
+            }
+
+            // sanificazione
+            finalUsername = finalUsername.replace(/[^a-zA-Z0-9_]/g, '')
+
+            if (finalUsername.length < 3) {
+                setMessage('Errore: Il nickname deve avere almeno 3 caratteri validi')
+                setLoading(false)
+                return
+            }
+
+            // controllo unicità
+            let isUnique = false
+            let counter = 0
+            let candidateName = finalUsername
+
+            try {
+                while (!isUnique) {
+                    const nameToTest = counter === 0 ? candidateName : `${candidateName}${counter}`
+
+                    const { data: existingUser } = await supabase
+                        .from('profiles')
+                        .select('username')
+                        .eq('username', nameToTest)
+                        .maybeSingle()
+
+                    if (!existingUser) {
+                        finalUsername = nameToTest
+                        isUnique = true
+                    } else {
+                        counter++
+                        if (counter > 100) throw new Error("Troppi utenti con questo nome.")
+                    }
+                }
+            } catch (err) {
+                setMessage("Errore durante la verifica del nickname")
+                setLoading(false)
+                return
+            }
+        }
+
+        // INVIO MAGIC LINK
         const { error } = await supabase.auth.signInWithOtp({
             email,
             options: {
                 // questo rimanda l'utente al "vigile" che scambia il codice con la sessione
                 emailRedirectTo: `${window.location.origin}/auth/callback`,
                 data: isRegistering ? {
-                    username: username,
-                    full_name: fullName,
+                    username: finalUsername,
+                    full_name: fullName.trim(),
                 } : {},
             },
         })
@@ -46,16 +97,16 @@ export default function LoginPage() {
                 {/* Toggle tra Accedi e registrati */}
                 <div className="flex bg-slate-100 p-1 rounded-xl mb-8">
                     <button
+                        onClick={() => { setIsRegistering(true); setMessage(''); }}
+                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isRegistering ? 'bg-white shadow text-emerald-700' : 'text-slate-500'}`}
+                    >
+                        REGISTRATI
+                    </button>
+                    <button
                         onClick={() => { setIsRegistering(false); setMessage(''); }}
                         className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isRegistering ? 'bg-white shadow text-emerald-700' : 'text-slate-500'}`}
                     >
                         ACCEDI
-                    </button>
-                    <button
-                        onClick={() => { setIsRegistering(true); setMessage(''); }}
-                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isRegistering ?'bg-white shadow text-emerald-700' : 'text-slate-500'}`}
-                    >
-                        REGISTRATI
                     </button>
                 </div>
 
@@ -78,7 +129,7 @@ export default function LoginPage() {
                                 <label className="text-xs font-bold text-slate-600 uppercase ml-1">Nome e Cognome</label>
                                 <input
                                     type="text"
-                                    placeholder="Beppe Manzari"
+                                    placeholder="es. Beppe Manzari"
                                     className="p-4 border-2 border-slate-200 rounded-xl text-slate-900 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-400"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
@@ -88,10 +139,10 @@ export default function LoginPage() {
 
                             {/* Username */}
                             <div className="flex flex-col gap-1 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <label className="text-xs font-bold text-slate-600 uppercase ml-1">Username (per la classifica)</label>
+                                <label className="text-xs font-bold text-slate-600 uppercase ml-1">Nickname (per la classifica)</label>
                                 <input
                                     type="text"
-                                    placeholder="FalsoNueve66"
+                                    placeholder="es. FalsoNueve66"
                                     className="p-4 border-2 border-slate-200 rounded-xl text-slate-900 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-400"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
@@ -108,7 +159,7 @@ export default function LoginPage() {
                         </label>
                         <input
                             type="email"
-                            placeholder="bomber@esempio.it"
+                            placeholder="es. bomber@esempio.it"
                             className="p-4 border-2 border-slate-200 rounded-xl text-slate-900 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-400"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -119,7 +170,7 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-emerald-600 text-white p-4 rounded-xl font-bold text-lg hover:bg-emerald-700 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-lg shadow-emerald-200 transition-all mt-2"
+                        className="bg-emerald-600 text-white p-4 rounded-xl font-bold text-lg hover:bg-emerald-700 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-lg shadow-emerald-200 transition-all mt-2 flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -136,11 +187,11 @@ export default function LoginPage() {
                 </form>
 
                 {message && (
-                    <div className="{`mt-6 p-4 rounded-xl text-center text-sm font-bold border ${
+                    <div className={`mt-6 p-4 rounded-xl text-center text-sm font-bold border ${
                         message.includes('Errore')
-                            ? 'bg-red-50 text-red-600 border border-red-100'
-                            : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                    }`}">
+                            ? 'bg-red-50 text-red-600 border-red-100'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                    }`}>
                         {message}
                         {!message.includes('Errore') && (
                             <p className="text-[10px] mt-2 text-emerald-600/70 uppercase tracking-tighter italic">
@@ -152,7 +203,7 @@ export default function LoginPage() {
             </div>
 
             <p className="mt-8 text-emerald-800/40 text-xs uppercase tracking-widest font-black">
-                Road to World Cup 2026
+                creato da smarta
             </p>
         </div>
     )

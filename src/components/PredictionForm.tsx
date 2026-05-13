@@ -102,47 +102,51 @@ export default function PredictionForm({ matches, existingPredictions }: any) {
             </div>
 
             {/* Lista match */}
-            <div className="space-y-3 px-4 max-2-2xl mx-auto">
+            <div className="space-y-3 px-2 sm:px-4 max-w-2xl mx-auto">
                 {matches.map((match: any, i: number) => (
-                    <div key={match.id} className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between gap-2 border border-emerald-100">
+                    <div key={match.id} className="bg-white p-3 sm:p-4 rounded-xl shadow-sm flex items-center justify-between gap-1 sm:gap-2 border border-emerald-100">
 
                         {/* Squadra casa */}
-                        <div className="flex-1 flex items-center justify-end gap-3 text-right">
+                        <div className="flex-1 flex items-center justify-end gap-1.5 sm:gap-3 text-right min-w-0">
                             {/* Desktop: nome completo */}
-                            <span className="text-xs font-bold uppercase text-slate-700 hidden sm:inline">{match.home_team}</span>
-                            {/* Mobile: nome tagliato */}
-                            <span className="text-sm font-black uppercase text-black sm:hidden">
+                            <span className="text-xs font-bold uppercase text-slate-700 hidden sm:inline truncate">
+                                {match.home_team}
+                            </span>
+                            {/* Mobile: TLA */}
+                            <span className="text-[11px] sm:text-sm font-black uppercase text-black sm:hidden shrink-0">
                                 {match.home_tla || match.home_team.substring(0,3)}
                             </span>
-                            <img src={match.home_flag} className="w-7 h-5 object-cover rounded shadow-sm border border-slate-100" alt="" />
+                            <img src={match.home_flag} className="w-6 h-4 sm:w-7 sm:h-5 object-cover rounded shadow-sm border border-slate-100 shrink-0" alt="" />
                         </div>
 
                         {/* Input Score */}
-                        <div className="flex items-center gap-1 bg-emerald-50 p-1.5 rounded-xl border border-emerald-100">
+                        <div className="flex items-center gap-0.5 sm:gap-1 bg-emerald-50 p-1 rounded-xl border border-emerald-100 shrink-0">
                             <input
                                 ref={(el) => {(inputsRef.current[i * 2] = el)}}
                                 type="text"
                                 inputMode="numeric"
-                                className="w-11 h-11 text-center font-black text-xl rounded-lg border-2 border-transparent focus:border-emerald-500 focus:bg-white text-slate-900 bg-transaparent transition-all outline-none"
+                                className="w-9 h-9 sm:w-11 sm:h-11 text-center font-black text-lg sm:text-xl rounded-lg border-2 border-transparent focus:border-emerald-500 focus:bg-white text-slate-900 bg-transparent transition-all outline-none"
                                 value={values[match.id].home}
                                 onChange={(e) => handleInputChange(match.id, 'home', e.target.value, i * 2)}
                             />
-                            <span className="text-emerald-300 font-black px-1">-</span>
+                            <span className="text-emerald-300 font-black px-0.5">-</span>
                             <input
                                 ref={(el) => {(inputsRef.current[i * 2 + 1] = el)}}
                                 type="text"
                                 inputMode="numeric"
-                                className="w-11 h-11 text-center font-black text-xl rounded-lg border-2 border-transparent focus:border-emerald-500 focus:bg-white text-slate-900 bg-transaparent transition-all outline-none"
+                                className="w-9 h-9 sm:w-11 sm:h-11 text-center font-black text-lg sm:text-xl rounded-lg border-2 border-transparent focus:border-emerald-500 focus:bg-white text-slate-900 bg-transparent transition-all outline-none"
                                 value={values[match.id].away}
                                 onChange={(e) => handleInputChange(match.id, 'away', e.target.value, i * 2 + 1)}
                             />
                         </div>
 
                         {/* Squadra Trasferta */}
-                        <div className="flex-1 flex items-center justify-start gap-3">
-                            <img src={match.away_flag} className="w-7 h-5 object-cover rounded shadow-sm border border-slate-100" alt="" />
-                            <span className="text-xs font-bold uppercase text-slate-700 hidden sm:inline">{match.away_team}</span>
-                            <span className="text-sm font-black uppercase text-black sm:hidden">
+                        <div className="flex-1 flex items-center justify-start gap-1.5 sm:gap-3 min-w-0">
+                            <img src={match.away_flag} className="w-6 h-4 sm:w-7 sm:h-5 object-cover rounded shadow-sm border border-slate-100 shrink-0" alt="" />
+                            <span className="text-xs font-bold uppercase text-slate-700 hidden sm:inline truncate">
+                                {match.away_team}
+                            </span>
+                            <span className="text-[11px] sm:text-sm font-black uppercase text-black sm:hidden shrink-0">
                                 {match.away_tla || match.away_team.substring(0,3)}
                             </span>
                         </div>

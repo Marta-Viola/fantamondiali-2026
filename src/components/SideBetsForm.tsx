@@ -124,7 +124,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                         {/* Overlay per chiudere il menu cliccando fuori */}
                         <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)}></div>
 
-                        <div className="absolute z-30 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                        <div className="absolute z-30 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 overflow-hidden">
 
                             {/* campo di ricerca */}
                             <div className="p-2 border-b border-slate-50 bg-slate-50/50">
@@ -139,7 +139,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                             </div>
 
                             {/* lista filtrata */}
-                            <div className="max-h-60 overflow-y-auto">
+                            <div className="max-h-60 overflow-y-auto custom-scrollbar">
                                 {filteredTeams.length > 0 ? (
                                     filteredTeams.map((t: any) => (
                                         <button
@@ -228,7 +228,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
             {/* SEZIONE VINCITORE */}
             <section className="text-center relative z-10">
                 <h2 className="text-xl font-black uppercase tracking-tighter mb-4 text-slate-800">
-                    🏆 Il Gran Finale
+                    🏆 Chi Vince?
                 </h2>
 
                 {winnerBet && (

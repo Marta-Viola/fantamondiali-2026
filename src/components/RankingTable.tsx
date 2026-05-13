@@ -20,7 +20,7 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                 <span className="sm:hidden">#</span>
                             </th>
                             <th className="py-4 px-2 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400">
-                                Giocatore
+                                Nickname
                             </th>
                             <th className="py-4 px-1 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-10 sm:w-20">
                                 <span className="hidden sm:inline">Esiti</span>
@@ -58,17 +58,17 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     key={user.id} 
                                     className={`border-b border-slate-50 ${isMe ? 'bg-emerald-50/60' : ''}`}
                                 >
-                                    <td className="py-4 px-2 sm:px-8">
-                                        <div className="flex flex-col items-center gap-0.5">
+                                    <td className="py-4 px-2 sm:px-8 text-center">
+                                        <div className="flex items-center justify-center gap-1 sm:gap-2">
                                             {/* mostra il numero solo se ha punti */}
-                                            <span className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[10px] sm:text-sm ${podiumStyle}`}>
+                                            <span className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[10px] sm:text-sm shrink-0 ${podiumStyle}`}>
                                                 {hasPoints ? currentRank : '-'}
                                             </span>
 
                                             {/* mostra le freccette solo se ha punti e c'è stato un cambiamento */}
-                                            <div className="h-2 flex items-center justify-center">
+                                            <div className="w-3 flex items-center justify-start">
                                                 {hasPoints && diff !== 0 && (
-                                                    <span className={`${diff > 0 ? 'text-emerald-500' : 'text-rose-500'} text-[8px] font-bold`}>
+                                                    <span className={`${diff > 0 ? 'text-emerald-500' : 'text-rose-500'} text-[10px] sm:text-xs font-bold`}>
                                                         {diff > 0 ? '▲' : '▼'}
                                                     </span>
                                                 )}
