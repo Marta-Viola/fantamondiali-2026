@@ -2,8 +2,11 @@ name: Daily Results Update
 
 on:
   schedule:
-    # 07:15 UTC = 09:15 italiane
-    - cron: '07 7 * * *'
+    # 5:11 UTC = 07:17 italiane
+    - cron: '17 5 * * *'
+
+    # 10:42 UTC (12:42 ITA)
+    - cron: '42 10 * * *'
   workflow_dispatch:
 
 jobs:
