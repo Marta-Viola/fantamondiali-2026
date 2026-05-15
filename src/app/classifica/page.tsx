@@ -4,21 +4,36 @@ import { redirect } from 'next/navigation'
 import StandardHeader from '@/components/ui/StandardHeader'
 import StandardFooter from '@/components/ui/StandardFooter'
 import RankingTable from '@/components/RankingTable'
+import LastUpdated from '@/components/ui/LastUpdated'
 
 
 export default async function ClassificaPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
     if (!user) redirect('/login')
 
-    const { data: rankings } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('total_points', { ascending: false })
-        .order('scores_count', { ascending: false })
-        .order('gd_count', { ascending: false })
-        .order('username', { ascending: true })
+    const [rankingsRes, settingsRes] = await Promise.all([
+        supabase
+            .from('profiles')
+            .select('*')
+            .order('total_points', { ascending: false })
+            .order('scores_count', { ascending: false })
+            .order('gd_count', { ascending: false })
+            .order('username', { ascending: true }),
+        supabase
+            .from('app_settings')
+            .select('last_sync_at')
+            .single()
+    ])
+
+    const rankings = rankingsRes.data || []
+    const lastSync = settingsRes.data?.last_sync_at    // const { data: rankings } = await supabase
+    //     .from('profiles')
+    //     .select('*')
+    //     .order('total_points', { ascending: false })
+    //     .order('scores_count', { ascending: false })
+    //     .order('gd_count', { ascending: false })
+    //     .order('username', { ascending: true })
 
     return (
         <>
@@ -32,6 +47,8 @@ export default async function ClassificaPage() {
                     <RankingTable users={rankings || []} currentUserId={user.id} />
                 </main>
             </div>
+
+            <LastUpdated date={lastSync}/>
 
             <StandardFooter />
         </>

@@ -3,25 +3,45 @@ import { redirect } from 'next/navigation'
 import StandardHeader from '@/components/ui/StandardHeader'
 import StandardFooter from '@/components/ui/StandardFooter'
 import MatchList from '@/components/MatchList'
+import LastUpdated from '@/components/ui/LastUpdated'
 
 export default async function PartitePage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
     if (!user) redirect('/login')
 
-    // carichiamo i match (già ordinati per tempo)
-    const { data: matches } = await supabase
-        .from('matches')
-        .select('*')
-        .in('status', ['SCHEDULED', 'LIVE', 'IN_PLAY', 'FINISHED', 'POSTPONED'])
-        .order('match_time', { ascending: true })
+    const [matchesRes, predictionsRes, settingsRes] = await Promise.all([
+        supabase
+            .from('matches')
+            .select('*')
+            .in('status', ['scheduled', 'live', 'finished', 'postponed'])
+            .order('match_time', { ascending: true }),
+        supabase
+            .from('predictions')
+            .select('*')
+            .eq('user_id', user.id),
+        supabase
+            .from('app_settings')
+            .select('last_sync_at')
+            .single()
+    ])
 
-    // carichiamo i pronostici dell'utente loggato
-    const { data: predictions } = await supabase
-        .from('predictions')
-        .select('*')
-        .eq('user_id', user.id)
+    const matches = matchesRes.data || []
+    const predictions = predictionsRes.data || []
+    const lastSync = settingsRes.data?.last_sync_at
+
+    // // carichiamo i match (già ordinati per tempo)
+    // const { data: matches } = await supabase
+    //     .from('matches')
+    //     .select('*')
+    //     .in('status', ['SCHEDULED', 'LIVE', 'IN_PLAY', 'FINISHED', 'POSTPONED'])
+    //     .order('match_time', { ascending: true })
+
+    // // carichiamo i pronostici dell'utente loggato
+    // const { data: predictions } = await supabase
+    //     .from('predictions')
+    //     .select('*')
+    //     .eq('user_id', user.id)
 
     return (
         <>
@@ -41,6 +61,8 @@ export default async function PartitePage() {
                     )}
                 </main>
             </div>
+
+            <LastUpdated date={lastSync} />
 
             <StandardFooter />
         </>

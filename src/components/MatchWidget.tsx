@@ -1,11 +1,13 @@
 import React from 'react'
 
-interface Match {
+export interface Match {
     id: number;
     match_time: string;
     stage: string;
     home_team: string;
     away_team: string;
+    home_tla: string;
+    away_tla: string;
     home_flag: string;
     away_flag: string;
     status: string;
@@ -13,7 +15,7 @@ interface Match {
     away_score: number | null;
 }
 
-interface Prediction {
+export interface Prediction {
     match_id: number;
     guess_home: number;
     guess_away: number;
@@ -37,7 +39,8 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
     const displayMatches = getDisplayMatches()
 
     return (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        // bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-100
+        <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-100">
             <div className="p-5 border-b border-slate-50 flex justify-between items-center">
                 <h2 className="font-black text-slate-800 uppercase tracking-tight text-sm">
                     Stato Partite 🏟️
@@ -50,7 +53,7 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
             <div className="divide-y divide-slate-50">
                 {displayMatches.map((match) => {
                     const pred = predictions.find(p => p.match_id === match.id)
-                    const isFinished = match.status === 'FINISHED'
+                    const isFinished = match.status === 'finished'
 
                     return (
                         <div key={match.id} className={`p-4 flex items-center justify-between gap-4 ${!isFinished ? 'bg-white' : 'bg-slate-50/30'}`}>
@@ -63,7 +66,7 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
                                 </div>
                                 <div className="truncate">
                                     <span className="font-black text-xs text-slate-700 uppercase tabular-nums">
-                                        {match.home_team} - {match.away_team}
+                                        {match.home_tla} - {match.away_tla}
                                     </span>
                                 </div>
                             </div>

@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { syncMatches } from './actions/sync-matches'
 import RankingWidget from '@/components/RankingWidget'
-import MatchWidget from '@/components/MatchWidget'
+import MatchWidget, { Match, Prediction } from '@/components/MatchWidget'
+import LastUpdated from '@/components/ui/LastUpdated'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -14,44 +15,30 @@ export default async function Home() {
   if (!user) redirect('/login')
 
   // fetch dati in parallelo
-  const [profileRes, rankingRes, matchesRes, predictionRes] = await Promise.all([
+  const [profileRes, rankingRes, matchesRes, predictionRes, settingsRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('profiles').select('*').order('total_points', { ascending: false }).limit(5),
     supabase.from('matches').select('*').order('match_time', { ascending: true }),
-    supabase.from('predictions').select('*').eq('user_id', user.id)
+    supabase.from('predictions').select('*').eq('user_id', user.id),
+    supabase.from('app_settings').select('last_sync_at').single()
   ])
 
   const profile = profileRes.data
   const rankings = rankingRes.data
-  const matches = matchesRes.data
-  const predictions = predictionRes.data
-
-  // // recuperiamo il profilo per vedere il punteggio
-  // const { data: profile } = await supabase
-  //   .from('profiles')
-  //   .select('*')
-  //   .eq('id', user.id)
-  //   .single()
+  const matches = (matchesRes.data as Match[]) || []
+  const predictions = (predictionRes.data as Prediction[]) || []
+  const lastSync = settingsRes.data?.last_sync_at
 
   // funzione per il tasto action
-  const handleSync = async () => {
-    'use server'
-    const result = await syncMatches()
-    if (result.success) {
-      console.log(`Sincronizzate ${result.count} partite!`)
-    } else {
-      console.error(result.error)
-    }
-  }
-
-  // const { data: rankings } = await supabase
-  //   .from('profiles')
-  //   .select('*')
-  //   .order('total_points', { ascending: false })
-  //   .order('scores_count', { ascending: false })
-  //   .order('gd_count', { ascending: false })
-  //   .order('username', { ascending: true })
-  //   .limit(5)
+  // const handleSync = async () => {
+  //   'use server'
+  //   const result = await syncMatches()
+  //   if (result.success) {
+  //     console.log(`Sincronizzate ${result.count} partite!`)
+  //   } else {
+  //     console.error(result.error)
+  //   }
+  // }
 
   // se l'utente c'è, mostriamo la Dashboard (temporanea)
   return (
@@ -87,6 +74,11 @@ export default async function Home() {
           </div>
         </div>
 
+        {/* Widget classifica */}
+        <section>
+          <RankingWidget users={rankings || []} currentUserId={user.id} />
+        </section>
+
         {/* widget partite */}
         <section className="space-y-3">
           <MatchWidget matches={matches} predictions={predictions} />
@@ -98,27 +90,21 @@ export default async function Home() {
           </Link>
         </section>
 
-        {/* Widget classifica */}
-        <section>
-          {/* <div className="flex justify-between items-end mb-3 px-2">
-            <h3 className="text-xs font-black uppercase text-slate-400 tracking-widest">Top 5 Globale</h3>
-            <Link href="/classifica" className="text-xs font-bold text-emerald-600 hover:underline">Vedi tutta</Link>
-          </div> */}
-          <RankingWidget users={rankings || []} currentUserId={user.id} />
-        </section>
-
         {/* Sezione Admin temporanea */}
         {profile?.role === 'admin' && (
-          <div className="mt-12 p-6 bg-orange-50 border-2 border-dashed border-orange-200 rounded-3xl">
-            <h4 className="text-orange-700 text-[10px] font-black uppercase mb-4 text-center tracking-widest">Area Riservata Capo</h4>
-            <form action={handleSync}>
-              <button className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold text-sm hover:bg-orange-600 shadow-orange-200 shadow-lg transition-all active:scale-95">
-                Forza Sincronizzazione API 🔂
-              </button>
-            </form>
+          <div className="bg-orange-50 border-2 border-dashed border-orange-200 p-4 rounded-[2rem]">
+            <Link
+              href="/admin"
+              className="flex items-center justify-center gap-3 w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-black uppercase italic text-sm transition-all shadow-lg shadow-orange-200 active:scale-[0.98]"
+            >
+              <span className="text-xl">🖥️</span>
+              Entra in Sala VAR
+            </Link>
           </div>
         )}
       </div>
+
+      <LastUpdated date={lastSync} />
     </main>
   )
 }
