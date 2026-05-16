@@ -4,7 +4,9 @@ import PredictionForm from '../../components/PredictionForm'
 import StandardHeader from '@/components/ui/StandardHeader'
 import Countdown from '@/components/ui/Countdown'
 import { PHASE_SCHEDULE } from '@/constants/phases'
+import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
 
+export const dynamic = 'force-dynamic'
 
 export default async function PronosticiPage() {
     const supabase = await createClient()
@@ -84,32 +86,22 @@ export default async function PronosticiPage() {
         }
     }
 
+    const stageMapper: Record<string, string> = {
+        'GIRONI': 'GROUP_STAGE',
+        'SEDICESIMI': 'LAST_16',
+        'OTTAVI': 'LAST_8',
+        'QUARTI': 'QUARTER_FINALS',
+        'SEMIFINALI': 'SEMI_FINALS',
+        'FINALE': 'FINAL'   // or third place...
+    }
 
-    // const isManualLock = !settings.is_approved
-    // const isTooEarly = now < openAt
-    // const isExpired = now > closedAt
-    // const canVote = settings.is_approved && !isTooEarly && !isExpired
-
-    // const phaseLabel = settings.current_phase.replace(/_/g, ' ')
-    // let headerConfig = {
-    //     title: `Pronostici ${phaseLabel} ⚽`,
-    //     subtitle: "Inserisci i tuoi voti",
-    //     color: "bg-emerald-600"
-    // }
-
-    // if (isManualLock) {
-    //     headerConfig = { title: "Lavori in Corso 🛠️", subtitle: "Stiamo scaldando i motori...", color: "bg-slate-600" }
-    // } else if (isTooEarly) {
-    //     headerConfig = { title: "Mercato Chiuso ⏳", subtitle: "I pronostici apriranno a breve", color: "bg-amber-500" }
-    // } else if (isExpired) {
-    //     headerConfig = { title: "Fase conclusa 🟥", subtitle: "I giochi sono fatti!", color: "bg-rose-600" }
-    // }
+    const apiStageName = stageMapper[settings.current_phase] || settings.current_phase
 
     // CARICAMENTO PARTITE
     const { data: matches } = await supabase
         .from('matches')
         .select('*')
-        .eq('stage', settings.current_phase)
+        .eq('stage', apiStageName)
         .order('match_time', { ascending: true })
 
     // 2. Carichiamo i pronostici già esistenti dell'utente
@@ -120,27 +112,29 @@ export default async function PronosticiPage() {
 
     return (
         <>
+        <RealtimeSettingsListener />
+
         <StandardHeader
                 title={config.title}
                 subtitle={config.subtitle}
                 className={config.color}
-            />
+        />
 
-        <div className="min-h-screen bg-slate-50 pb-20">
-            <main className="max-w-2xl mx-auto p-4">
+        <div className="bg-slate-50 pb-32">
+            <main className="max-w-2xl mx-auto p-4 space-y-6">
 
                 {/* AVVISO STATO */}
                 {!config.allowVoting && (
-                    <div className={`mb-8 p-6 rounded-[2rem] text-white shadow-lg ${config.color} border-b-4 border-black/20 transform transition-all`}>
-                        <h2 className="font-black uppercase italic text-xl">
+                    <div className={`p-6 rounded-[2rem] text-white shadow-xl ${config.color} border-b-4 border-black/20 transform transition-all`}>
+                        <h2 className="font-black uppercase italic text-lg tracking-tight">
                             {config.statusLabel}
                         </h2>
-                        <p className="text-sm font-bold opacity-90 mb-4">
+                        <p className="text-xs font-bold opacity-90 mt-1 mb-4 leading-relaxed">
                             {isBlocked
                                 ? "Stiamo caricando le partite della nuova fase. Torna tra pochissimo!"
                                 : isInitial
                                 ? "Le votazioni non sono ancora aperte. Guarda quanto manca:"
-                                : "Non è più possibile modificare i voti. Guarda quanto manca alla prossima fase:"}
+                                : "I giochi sono fatti! Le votazioni sono chiuse per questa fase. Puoi comunque consultare i tuoi pronostici qui sotto:"}
                         </p>
 
                         {config.showCountdown && (
@@ -160,10 +154,10 @@ export default async function PronosticiPage() {
                         isLocked={!config.allowVoting}
                 />
                 ) : (
-                    <div className="text-center py-16 bg-white rounded-[2rem] border-2 border-dashed border-slate-200 shadow-inner">
-                        <div className="text-4xl mb-4">🏟️</div>
-                        <p className="font-bold text-slate-400 italic text-sm px-8 leading-relaxed">
-                            I match per la fase <span className="text-slate-600">{phaseLabel}</span> appariranno qui non appena il mercato sarà aperto ufficialmente.
+                    <div className="text-center py-16 bg-white rounded-[2rem] border-2 border-dashed border-slate-200 shadow-sm">
+                        <div className="text-4xl mb-3 animate-pulse">🏟️</div>
+                        <p className="font-bold text-slate-400 italic text-xs px-8 leading-relaxed">
+                            I match per la fase <span className="text-slate-600 not-italic font-black">{phaseLabel}</span> appariranno qui non appena il mercato sarà aperto ufficialmente.
                         </p>
                     </div>
                 )}

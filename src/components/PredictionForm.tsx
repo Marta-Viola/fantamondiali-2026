@@ -76,21 +76,27 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
     const percentage = Math.round((completedCount / totalCount) * 100);
 
     return (
-        <div className="w-full max-w-2xl mx-auto px-4 mt-8 space-y-12">
+        <form 
+            onSubmit={(e) => {
+                e.preventDefault()
+                if (!isLocked) setIsModalOpen(true)
+            }}
+            className="w-full max-w-2xl mx-auto px-4 mt-4 space-y-10 pb-32"
+        >
             {/* Progress Bar */}
-            <div className="sticky top-24 z-30 w-full max-w-2xl mx-auto px-4 mb-4">
-                <div className={`bg-white/90 backdrop-blur-md border p-4 rounded-3xl shadow-lg ${isLocked ? 'border-slate-200' : 'border-emerald-100'}`}>
+            <div className={`${isLocked ? 'relative' : 'sticky top-20'} z-30 w-full max-w-2xl mx-auto mb-4 transition-all`}>
+                <div className={`bg-white/95 backdrop-blur-md border p-4 rounded-3xl shadow-md ${isLocked ? 'border-slate-200 bg-slate-50/90' : 'border-emerald-100'}`}>
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                             <span className={`text-[10px] text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter ${isLocked ? 'bg-slate-400' : 'bg-emerald-600'}`}>
                                 {isLocked ? 'CHIUSO' : 'LIVE'}
                             </span>
                             <span className={`text-[11px] font-black uppercase tracking-widest ${isLocked ? 'text-slate-400' : 'text-slate-700'}`}>
-                                Stato Pronostici
+                                {isLocked ? 'Riepilogo Scelte' : 'Stato Pronostici'}
                             </span>
                         </div>
                         
-                        <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${isLocked ? 'text-slate-500 bg-slate-50 border-slate-200' : 'text-emerald-700 bg-emerald-50 border-emerald-100'}`}>
+                        <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${isLocked ? 'text-slate-500 bg-slate-100 border-slate-200' : 'text-emerald-700 bg-emerald-50 border-emerald-100'}`}>
                             {completedCount} <span className="text-slate-400 mx-1">/</span> {totalCount}
                         </span>
                     </div>
@@ -105,50 +111,50 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             </div>
 
             {/* Lista match */}
-            <div className="space-y-3 px-2 sm:px-4 max-w-2xl mx-auto">
+            <div className="space-y-3 max-w-2xl mx-auto">
                 {matches.map((match: any, i: number) => (
-                    <div key={match.id} className="bg-white p-3 sm:p-4 rounded-xl shadow-sm flex items-center justify-between gap-1 sm:gap-2 border border-emerald-100">
+                    <div key={match.id} className="bg-white p-3 sm:p-4 rounded-2xl shadow-sm flex items-center justify-between gap-1 sm:gap-2 border border-slate-100 hover:border-emerald-100 transition-colors">
 
                         {/* Squadra casa */}
                         <div className="flex-1 flex items-center justify-end gap-1.5 sm:gap-3 text-right min-w-0">
                             {/* Desktop: nome completo */}
-                            <span className="text-xs font-bold uppercase text-slate-700 hidden sm:inline truncate">
+                            <span className="text-xs font-black uppercase text-slate-700 hidden sm:inline truncate">
                                 {match.home_team}
                             </span>
                             {/* Mobile: TLA */}
-                            <span className="text-[11px] sm:text-sm font-black uppercase text-black sm:hidden shrink-0">
+                            <span className="text-[11px] sm:text-sm font-black uppercase text-slate-800 sm:hidden shrink-0">
                                 {match.home_tla || match.home_team.substring(0,3)}
                             </span>
-                            <img src={match.home_flag} className="w-6 h-4 sm:w-7 sm:h-5 object-cover rounded shadow-sm border border-slate-100 shrink-0" alt="" />
+                            <img src={match.home_flag} className="w-6 h-4 sm:w-7 sm:h-5 object-cover rounded shadow-xs border border-slate-100 shrink-0" alt="" />
                         </div>
 
                         {/* Input Score */}
-                        <div className={`flex items-center gap-0.5 sm:gap-1 p-1 rounded-xl border shrink-0 transition-colors ${isLocked ? 'bg-slate-100 border-slate-200' : 'bg-emerald-50 border-emerald-100'}`}>
+                        <div className={`flex items-center gap-0.5 sm:gap-1 p-1 rounded-xl border shrink-0 transition-colors ${isLocked ? 'bg-slate-50 border-slate-200' : 'bg-emerald-50/50 border-emerald-100/80'}`}>
                             <input
-                                ref={(el) => {(inputsRef.current[i * 2] = el)}}
+                                ref={(el) => { inputsRef.current[i * 2] = el }}
                                 type="text"
                                 inputMode="numeric"
                                 disabled={isLocked}
                                 className={`w-9 h-9 sm:w-11 sm:h-11 text-center font-black text-lg sm:text-xl rounded-lg border-2 border-transparent transition-all outline-none ${isLocked ? 'text-slate-400 bg-transparent cursor-not-allowed' : 'focus:border-emerald-500 focus:bg-white text-slate-900 bg-transparent'}`}
-                                value={values[match.id].home}
+                                value={values[match.id]?.home ?? ''}
                                 onChange={(e) => handleInputChange(match.id, 'home', e.target.value, i * 2)}
                             />
                             <span className={`font-black px-0.5 ${isLocked ? 'text-slate-300' : 'text-emerald-300'}`}>-</span>
                             <input
-                                ref={(el) => {(inputsRef.current[i * 2 + 1] = el)}}
+                                ref={(el) => { inputsRef.current[i * 2 + 1] = el }}
                                 type="text"
                                 inputMode="numeric"
                                 disabled={isLocked}
                                 className={`w-9 h-9 sm:w-11 sm:h-11 text-center font-black text-lg sm:text-xl rounded-lg border-2 border-transparent transition-all outline-none ${isLocked ? 'text-slate-400 bg-transparent cursor-not-allowed' : 'focus:border-emerald-500 focus:bg-white text-slate-900 bg-transparent'}`}
-                                value={values[match.id].away}
+                                value={values[match.id]?.away ?? ''}
                                 onChange={(e) => handleInputChange(match.id, 'away', e.target.value, i * 2 + 1)}
                             />
                         </div>
 
                         {/* Squadra Trasferta */}
                         <div className="flex-1 flex items-center justify-start gap-1.5 sm:gap-3 min-w-0">
-                            <img src={match.away_flag} className="w-6 h-4 sm:w-7 sm:h-5 object-cover rounded shadow-sm border border-slate-100 shrink-0" alt="" />
-                            <span className="text-xs font-bold uppercase text-slate-700 hidden sm:inline truncate">
+                            <img src={match.away_flag} className="w-6 h-4 sm:w-7 sm:h-5 object-cover rounded shadow-xs border border-slate-100 shrink-0" alt="" />
+                            <span className="text-xs font-black uppercase text-slate-700 hidden sm:inline truncate">
                                 {match.away_team}
                             </span>
                             <span className="text-[11px] sm:text-sm font-black uppercase text-black sm:hidden shrink-0">
@@ -161,21 +167,24 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             
             {/* Pulsante Salva Fluttuante */}
             {isLocked ? (
-                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-slate-800/90 backdrop-blur-md text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-in fade-in zoom-in duration-300">
-                    <span className="text-xl">🔒</span>
-                    <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none">Mercato</span>
-                        <span className="text-sm font-black uppercase italic">Scommesse Chiuse</span>
+                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <span className="text-base">🔒</span>
+                    <div className="flex flex-col text-left">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">Scommesse</span>
+                        <span className="text-xs font-black uppercase italic tracking-tight text-slate-200">Fase Conclusa</span>
                     </div>
                 </div>
             ) : (
-                <ConfirmButton
-                    text="Salva Scommesse"
-                    icon="💾"
-                    onClick={() => setIsModalOpen(true)}
-                    loading={loading}
-                    isFloating={true}
-                />
+                // <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
+                    <ConfirmButton
+                        text="Salva Scommesse"
+                        icon="💾"
+                        // type="submit"
+                        onClick={() => setIsModalOpen(true)}
+                        loading={loading}
+                        isFloating={true}
+                    />
+                // </div>  // forti dubbi
             )}
             
             {/* POP-UP */}
@@ -186,12 +195,12 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                     onConfirm={onFinalSave}
                     loading={loading}
                     emoji="⚽"
-                    title="Quasi fatto!"
+                    title="Confermi le scelte?"
                     description={
-                        <>Hai tempo fino al <span className="font-bold text-emerald-600">10 giugno</span> per modificare i tuoi pronostici.</>
+                        <>I tuoi pronostici verranno registrati. Potrai modificarli liberamente fino alla chiusura ufficiale del mercato di questa fase.</>
                     }
                 />
             )}
-        </div>
+        </form>
     )
 }

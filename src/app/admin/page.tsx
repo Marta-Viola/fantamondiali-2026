@@ -4,6 +4,8 @@ import Link from 'next/link'
 import AdminControlCenter from '@/components/AdminControlCenter'
 import { syncMatches } from '../actions/sync-matches'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPage() {
     const supabase = await createClient()
 

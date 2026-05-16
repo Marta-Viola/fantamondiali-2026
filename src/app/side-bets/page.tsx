@@ -3,8 +3,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import StandardHeader from '@/components/ui/StandardHeader'
-import StandardMain from '@/components/ui/StandardMain'
 import SideBetsForm from '@/components/SideBetsForm'
+import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
+
+export const dynamic = 'force-dynamic'
 
 export default async function SideBetsPage() {
     const supabase = await createClient()
@@ -41,6 +43,7 @@ export default async function SideBetsPage() {
     
     return (
         <>
+        <RealtimeSettingsListener />
         <StandardHeader
                 title="Scommesse Speciali ⭐"
                 subtitle="Indovina il futuro del Mondiale e scala la classifica"

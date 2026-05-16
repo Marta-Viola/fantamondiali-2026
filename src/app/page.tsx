@@ -3,10 +3,13 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { syncMatches } from './actions/sync-matches'
+// import { syncMatches } from './actions/sync-matches'
 import RankingWidget from '@/components/RankingWidget'
 import MatchWidget, { Match, Prediction } from '@/components/MatchWidget'
 import LastUpdated from '@/components/ui/LastUpdated'
+import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
+
+export const dynamic = 'force-dynamic'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -43,6 +46,7 @@ export default async function Home() {
   // se l'utente c'è, mostriamo la Dashboard (temporanea)
   return (
     <main className="min-h-screen bg-slate-50 pb-12">
+      <RealtimeSettingsListener />
       {/* header dashboard */}
       <div className="bg-emerald-600 text-white pt-10 pb-16 px-6 rounded-b-[3.5rem] shadow-lg text-center">
         <h1 className="text-2xl font-black uppercase italic tracking-tighter">
