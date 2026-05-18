@@ -23,9 +23,15 @@ interface SideBetsFormProps {
     bets: Bet[]
     teams: any[]
     initialAnswers: InitialAnswer[]
+    isLocked: boolean
 }
 
-export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFormProps) {
+export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = false }: SideBetsFormProps) {
+    
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+
     // trasformazione dati
     const formattedInitialData = initialAnswers.reduce((acc, curr) => {
         acc[curr.side_bet_id] = curr.answer
@@ -35,10 +41,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
     // stato inizializzato
     const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
     
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const router = useRouter()
-
     // identifichiamo gli ID per l'automazione (basandoci sulle label)
     const winnerBet = bets.find((b) => b.label.startsWith('Vincitore'))
     const finalScoreBet = bets.find((b) => b.type === 'score')
@@ -46,28 +48,14 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
     const semiBets = bets.filter((b: any) => b.label.startsWith('Semifinalista'))
     const topScorerBet = bets.find((b) => b.label.startsWith('Capocannoniere'))
 
-    const getFlag = (teamName: string) => teams.find((t: any) => t.name === teamName)?.flag
+    // const getFlag = (teamName: string) => teams.find((t: any) => t.name === teamName)?.flag
 
     const handleTeamChange = (betId: string, teamName: string) => {
+        if (isLocked) return
         setAnswers((prev) => ({
             ...prev,
             [betId]: teamName
         }))
-        
-        // let newAnswers = { ...answers, [betId]: teamName }
-
-        // // AUTOMAZIONE
-        // if (betId === winnerBet?.id) {
-        //     // se cambio il vincitore, lo metto anceh come primo finalista e primo semifinalista
-        //     if (finalistBets[0]) newAnswers[finalistBets[0].id] = teamName
-        //     if (semiBets[0]) newAnswers[semiBets[0].id] = teamName
-        // } else if (finalistBets.some((f: Bet) => f.id === betId)) {
-        //     // se cambio un finalista, lo metto anche cmoe semifinalista corrispondente
-        //     const index = finalistBets.findIndex((f: Bet) => f.id === betId)
-        //     if (semiBets[index]) newAnswers[semiBets[index].id] = teamName
-        // }
-
-        // setAnswers(newAnswers)
     }
 
     const TeamSelect = ({ bet, isBig = false, forceTla = false }: { bet: any, isBig?: boolean, forceTla?: boolean }) => {
@@ -84,18 +72,23 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                 {/* Bottone che simula la Select */}
                 <button
                     type="button"
+                    disabled={isLocked}
                     onClick={() => {
                         setIsOpen(!isOpen)
                         setSearchTerm("")
                     }}
-                    className={`w-full bg-slate-50 border-2 border-transparent rounded-2xl font-bold text-slate-800 transition-all outline-none flex items-center justify-center relative
-                        ${isOpen ? 'border-emerald-500 bg-white shadow-md' : 'hover:bg-slate-100'} 
+                    className={`w-full border-2 border-transparent rounded-2xl font-bold text-slate-800 transition-all outline-none flex items-center justify-center relative
+                        ${isOpen ? 'border-emerald-500 bg-white shadow-md' : ''} 
+                        ${isLocked 
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-75' 
+                            : 'bg-slate-50 hover:bg-slate-100'
+                        } 
                         ${isBig ? 'p-5 text-2xl' : 'p-4 text-sm'}`}
                 >
                     <div className="flex items-center gap-3 justify-center">
                         {selectedTeam ? (
                             <>
-                                <img src={selectedTeam.flag} alt="flag" className={`object-cover rounded-sm shadow-sm ${isBig ? 'w-10 h-6' : 'w-6 h-4'}`} />
+                                <img src={selectedTeam.flag} alt="flag" className={`object-cover rounded shadow-xs ${isBig ? 'w-10 h-6' : 'w-6 h-4'}`} />
                                 {/* nome intero sempre visibile su desktop */}
                                 <span className="truncate hidden sm:block">{selectedTeam.name}</span>
                                 {/* nome su mobile abbreviato solo se forceTla è vero, altrimenti intero */}
@@ -110,22 +103,25 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                             <span className="text-slate-400 font-medium">{isBig ? 'Scegli il Campione' : 'Seleziona...'}</span>
                         )}
                     </div>
+
                     {/* Freccetta */}
-                    <div className="absoulte right-4">
-                        <svg className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
+                    {!isLocked && (
+                        <div className="absolute right-4">
+                            <svg className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    )}
+                    
                 </button>
 
                 {/* lista a tendina personalizzata con bandiere */}
-                {isOpen && (
+                {isOpen && !isLocked && (
                     <>
                         {/* Overlay per chiudere il menu cliccando fuori */}
                         <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)}></div>
 
                         <div className="absolute z-30 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 overflow-hidden">
-
                             {/* campo di ricerca */}
                             <div className="p-2 border-b border-slate-50 bg-slate-50/50">
                                 <input
@@ -170,7 +166,14 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
         )
     }
 
+    const handleConfirmClick = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (isLocked) return
+        setIsModalOpen(true)
+    }
+
     const handleSave = async () => {
+        if (isLocked) return
         setIsModalOpen(false)
         setLoading(true)
 
@@ -186,8 +189,10 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
     }
     
     return (
-        <div className="w-full max-w-2xl mx-auto px-4 mt-8 space-y-12">
-
+        <form 
+            onSubmit={handleConfirmClick}
+            className="w-full max-w-2xl mx-auto px-4 mt-4 space-y-12 pb-24"
+        >
             {/*  SEZIONE SEMIFINALI */}
             <section className="relative z-30">
                 <h2 className="text-xl font-black uppercase tracking-tighter mb-4 text-center text-slate-800">
@@ -195,8 +200,8 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
                     {semiBets.map((bet, idx) => (
-                        <div key={bet.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                            <span className="text-[9px] font-black text-emerald-600 uppercase mb-2 block">
+                        <div key={bet.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs">
+                            <span className={`text-[9px] font-black uppercase mb-2 block ${isLocked ? 'text-slate-400' : 'text-emerald-600'}`}>
                                 Semifinalista {idx + 1}
                             </span>
                             <TeamSelect bet={bet} forceTla={true} />
@@ -212,14 +217,14 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                 </h2>
                 <div className="flex flex-col sm:flex-row items-center gap-4 relative">
                     {finalistBets.map((bet, idx) => (
-                        <div key={bet.id} className="flex-1 w-full bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-sm">
+                        <div key={bet.id} className="flex-1 w-full bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-xs">
                             <span className="text-[10px] font-black text-slate-400 uppercase mb-2 block">
                                 Finalista {idx + 1}
                             </span>
                             <TeamSelect bet={bet} />
                         </div>
                     ))}
-                    <div className="flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 text-white w-10 h-10 rounded-full items-center justify-center font-black text-xs border-4 border-emerald-50 z-30 shadow-md">
+                    <div className="flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 text-white w-10 h-10 rounded-full items-center justify-center font-black text-xs border-4 border-slate-50 z-30 shadow-md">
                         VS
                     </div>
                 </div>
@@ -232,19 +237,26 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                 </h2>
 
                 {winnerBet && (
-                    <div className="bg-gradient-to-b from-amber-50 to-white p-8 rounded-[3rem] border-4 border-amber-400 shadow-[0_20px_50px_rgba(251,191,36,0.2)] relative overflow-hidden">
+                    <div className={`p-8 rounded-[3rem] border-4 shadow-lg relative overflow-hidden transition-all
+                        ${isLocked 
+                            ? 'from-slate-50 to-white bg-gradient-to-b border-slate-200' 
+                            : 'from-amber-50 to-white bg-gradient-to-b border-amber-400 shadow-[0_20px_50px_rgba(251,191,36,0.2)]'
+                        }`}
+                    >
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl pointer-events-none">✨</div>
 
-                        {/* sezione vincitore */}
+                        {/* campo vincitore */}
                         <div className="mb-8">
-                            <p className="text-[10px] font-black uppercase text-amber-600 mb-4 tracking-widest">Chi alzerà la coppa?</p>
+                            <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${isLocked ? 'text-slate-400' : 'text-amber-600'}`}>
+                                Chi alzerà la coppa?
+                            </p>
                             <TeamSelect bet={winnerBet} isBig={true} />
                         </div>
 
                         {/* risultato esatto */}
                         {finalScoreBet && (
-                            <div className="pt-6 border-t-2 border-amber-200/50 relative z-10">
-                                <p className="text-[10px] font-black uppercase text-amber-600 mb-4 tracking-widest">
+                            <div className={`pt-6 border-t-2 relative z-10 ${isLocked ? 'border-slate-200/60' : 'border-amber-200/50'}`}>
+                                <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${isLocked ? 'text-slate-400' : 'text-amber-600'}`}>
                                     {finalScoreBet.label}
                                 </p>
 
@@ -254,44 +266,45 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                                         type="number"
                                         inputMode="numeric"
                                         pattern="[0-9]*"
+                                        disabled={isLocked}
                                         value={(answers[finalScoreBet.id] || "0-0").split("-")[0]}
                                         onChange={(e) => {
+                                            if (isLocked) return
                                             const val = e.target.value.replace(/\D/g, "") || "0"
                                             const current = (answers[finalScoreBet.id] || "0-0").split("-")
                                             setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${val}-${current[1]}` }))
                                         }}
-                                        className="w-16 h-14 bg-white border-2 border-amber-200 rounded-2xl font-black text-2xl text-center text-slate-800 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all shadow-inner p-0"
+                                        className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
+                                            ${isLocked 
+                                                ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
+                                                : 'bg-white border-amber-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 text-slate-800'
+                                            }`}
                                     />
 
-                                    <span className="text-2xl font-black text-amber-400">-</span>
+                                    <span className={`text-2xl font-black ${isLocked ? 'text-slate-300' : 'text-amber-400'}`}>-</span>
 
                                     {/* input ospite */}
                                     <input
                                         type="number"
                                         inputMode="numeric"
                                         pattern="[0-9]*"
+                                        disabled={isLocked}
                                         value={(answers[finalScoreBet.id] || "0-0").split("-")[1]}
                                         onChange={(e) => {
+                                            if (isLocked) return
                                             const val = e.target.value.replace(/\D/g, "") || "0"
                                             const current = (answers[finalScoreBet.id] || "0-0").split("-")
                                             setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${current[0]}-${val}` }))
                                         }}
-                                        className="w-16 h-14 bg-white border-2 border-amber-200 rounded-2xl font-black text-2xl text-center text-slate-800 outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all shadow-inner p-0"
-                                    />
-                                    
-                                    {/* <input
-                                        type="text"
-                                        placeholder="0 - 0"
-                                        value={answers[finalScoreBet.id] || ''}
-                                        onChange={(e) => setAnswers(prev => ({ ...prev, [finalScoreBet.id]: e.target.value }))}
-                                        className="w-full bg-white border-2 border-amber-200 rounded-2xl px-4 py-3 font-black text-2xl text-center text-slate-800 placeholder:text-slate-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 outline-none transition-all shadow-inner"
-                                    /> */}
-                                    
+                                        className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
+                                            ${isLocked 
+                                                ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
+                                                : 'bg-white border-amber-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 text-slate-800'
+                                            }`}
+                                    />                                    
                                 </div>
                             </div>
                         )}
-
-                        
                     </div>
                 )}
             </section>
@@ -302,28 +315,44 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                     👟 Chi sarà il capocannoniere?
                 </h2>
                 {topScorerBet && (
-                    <div className="bg-slate-800 p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+                    <div className={`p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden transition-colors ${isLocked ? 'bg-slate-200 border border-slate-300' : 'bg-slate-800'}`}>
                         <div className="absolute -bottom-4 -right-4 text-6xl opacity-10 grayscale pointer-events-none">⚽</div>
                         <input
                             type="text"
-                            placeholder="Nome e Cognome del bomber..."
-                            className="relative z-10 w-full p-5 bg-white/10 border-2 border-white/20 rounded-2xl font-bold text-white placeholder:text-white/30 outline-none focus:border-emerald-400 transition-all text-center"
+                            disabled={isLocked}
+                            placeholder={isLocked ? "Nessun bomber inserito": "Nome e Cognome del bomber..."}
+                            className={`relative z-10 w-full p-5 border-2 rounded-2xl font-bold transition-all text-center outline-none
+                                ${isLocked 
+                                    ? 'bg-slate-100 border-slate-300 text-slate-400 cursor-not-allowed' 
+                                    : 'bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-emerald-400'
+                                }`}
                             value={answers[topScorerBet.id] || ''}
-                            onChange={(e) => setAnswers({...answers, [topScorerBet.id]: e.target.value})}
+                            onChange={(e) => {
+                                if (isLocked) return
+                                setAnswers({...answers, [topScorerBet.id]: e.target.value})
+                            }}
                         />
                     </div>
                 )}
             </section>
 
             {/* TASTO SALVA */}
-            <ConfirmButton
-                text="Salva Scommesse"
-                icon="💾"
-                onClick={() => setIsModalOpen(true)}
-                loading={loading}
-                isFloating={false}
-            />
-
+            {isLocked ? (
+                // se è bloccato un banner pulito anziché il pulsante attivo
+                <div className="w-full text-center py-4 bg-slate-100 rounded-2xl border border-dashed border-slate-200 text-xs font-black uppercase text-slate-400 flex items-center justify-center gap-2 tracking-wider">
+                    🔒 Modifiche non consentite
+                </div>
+            ) : (
+                <ConfirmButton
+                    text="Salva Scommesse"
+                    icon="💾"
+                    type="submit"
+                    // onClick={() => setIsModalOpen(true)}
+                    loading={loading}
+                    isFloating={false}
+                />
+            )}
+            
             {/* POP-UP DI CONFERMA */}
             {isModalOpen && (
                 <StandardModal
@@ -332,12 +361,12 @@ export default function SideBetsForm({ bets, teams, initialAnswers }: SideBetsFo
                     onConfirm={handleSave}
                     loading={loading}
                     emoji="⭐"
-                    title="Quasi fatto!"
+                    title="Confermi le scelte?"
                     description={
-                        <>Hai tempo fino al <span className="font-bold text-emerald-600">10 giugno</span> per modificare i tuoi pronostici speciali.</>
+                        <>I tuoi pronostici speciali verranno registrati. Potrai modificarli liberamente fino al fischio d'inizio ufficiale della fase a gironi.</>
                     }
                 />
             )}
-        </div>
+        </form>
     )
 }

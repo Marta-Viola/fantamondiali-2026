@@ -86,22 +86,22 @@ export default async function PronosticiPage() {
         }
     }
 
-    const stageMapper: Record<string, string> = {
-        'GIRONI': 'GROUP_STAGE',
-        'SEDICESIMI': 'LAST_16',
-        'OTTAVI': 'LAST_8',
-        'QUARTI': 'QUARTER_FINALS',
-        'SEMIFINALI': 'SEMI_FINALS',
-        'FINALE': 'FINAL'   // or third place...
+    const stageMapper: Record<string, string[]> = {
+        'GIRONI': ['GROUP_STAGE'],
+        'SEDICESIMI': ['LAST_32'],
+        'OTTAVI': ['LAST_16'],
+        'QUARTI': ['QUARTER_FINALS'],
+        'SEMIFINALI': ['SEMI_FINALS'],
+        'FINALE': ['FINAL', 'THIRD_PLACE']
     }
 
-    const apiStageName = stageMapper[settings.current_phase] || settings.current_phase
+    const apiStages = stageMapper[settings.current_phase] || settings.current_phase
 
     // CARICAMENTO PARTITE
     const { data: matches } = await supabase
         .from('matches')
         .select('*')
-        .eq('stage', apiStageName)
+        .in('stage', apiStages)
         .order('match_time', { ascending: true })
 
     // 2. Carichiamo i pronostici già esistenti dell'utente
@@ -134,7 +134,7 @@ export default async function PronosticiPage() {
                                 ? "Stiamo caricando le partite della nuova fase. Torna tra pochissimo!"
                                 : isInitial
                                 ? "Le votazioni non sono ancora aperte. Guarda quanto manca:"
-                                : "I giochi sono fatti! Le votazioni sono chiuse per questa fase. Puoi comunque consultare i tuoi pronostici qui sotto:"}
+                                : "I giochi sono fatti! Le votazioni sono chiuse per questa fase. Ecco quanto manca all'apertura della prossima fase:"}
                         </p>
 
                         {config.showCountdown && (
@@ -147,8 +147,9 @@ export default async function PronosticiPage() {
                 )}
 
                 {/* LOGICA VISIBILITà FORM */}
-                {(isOpen || isClosed) ? (
+                {(isOpen || isClosed || isInitial) ? (
                     <PredictionForm
+                        key={`${settings.current_phase}-${existingPredictions?.length || 0}`}
                         matches={matches || []}
                         existingPredictions={existingPredictions || []}
                         isLocked={!config.allowVoting}
@@ -157,7 +158,7 @@ export default async function PronosticiPage() {
                     <div className="text-center py-16 bg-white rounded-[2rem] border-2 border-dashed border-slate-200 shadow-sm">
                         <div className="text-4xl mb-3 animate-pulse">🏟️</div>
                         <p className="font-bold text-slate-400 italic text-xs px-8 leading-relaxed">
-                            I match per la fase <span className="text-slate-600 not-italic font-black">{phaseLabel}</span> appariranno qui non appena il mercato sarà aperto ufficialmente.
+                            I mercati sono temporaneamente chiusi. La Sala VAR sta preparando il tabellone.
                         </p>
                     </div>
                 )}

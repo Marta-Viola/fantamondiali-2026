@@ -1,10 +1,11 @@
 interface ConfirmButtonProps {
-    onClick: () => void;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
     loading: boolean;
     text: string;
     icon?: string;
     disabled?: boolean;
     isFloating?: boolean;
+    type?: "button" | "submit" | "reset"
 }
 
 export default function ConfirmButton({
@@ -13,11 +14,13 @@ export default function ConfirmButton({
     text,
     icon = "💾",
     disabled,
-    isFloating = false
+    isFloating = false,
+    type="button"
 }: ConfirmButtonProps) {
 
     const buttonContent = (
         <button
+            type={type}
             onClick={onClick}
             disabled={disabled || loading}
             className={`w-full max-w-[280px] sm:max-w-md bg-emerald-600/95 backdrop-blur-sm text-white py-4 rounded-full font-black uppercase shadow-[0_15px_30px_rgba(5,150,105,0.4)] hover:bg-emerald-700 hover:-translate-y-1 active:scale-95 disabled:bg-slate-400 transition-all flex items-center justify-center gap-3 border border-emerald-400/30 ring-white/10 pointer-events-auto`}
