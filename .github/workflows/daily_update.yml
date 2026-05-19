@@ -3,10 +3,12 @@ name: Daily Results Update
 on:
   schedule:
     # 5:11 UTC = 07:17 italiane
-    - cron: '17 5 * * *'
+    # - cron: '17 5 * * *'
 
+    - cron: '0 2,8,14,20 * * *'
+    
     # 10:42 UTC (12:42 ITA)
-    - cron: '42 10 * * *'
+    # - cron: '42 10 * * *'
   workflow_dispatch:
 
 jobs:
@@ -15,6 +17,6 @@ jobs:
     steps:
       - name: Call Edge Function
         run: |
-          curl -i -X POST https://kqybtwmlvpaszzzomyzb.supabase.co/functions/v1/update-results \
+          curl -i -f -X POST https://kqybtwmlvpaszzzomyzb.supabase.co/functions/v1/update-results \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Content-Type: application/json"
