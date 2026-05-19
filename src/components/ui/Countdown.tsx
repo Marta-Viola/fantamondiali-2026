@@ -49,25 +49,25 @@ export default function Countdown({ targetDate, onEnd, variant = 'default' }: Co
     // classi dinamiche in base alla variante scelta
     const containerClasses = {
         default: "flex gap-3 justify-center",
-        compact: "flex gap-2 items-baseline",
+        compact: "flex gap-1 sm:gap-2 items-baseline",
         outline: "flex gap-3 justify-center p-4 border-2 border-dashed border-white/30 rounded-2xl"
     }
 
     const boxClasses = {
         default: "bg-black/20 backdrop-blur-sm min-w-[50px] p-2 rounded-xl flex flex-col items-center border border-white/10",
-        compact: "flex items-baseline gap-1",
+        compact: "flex items-baseline gap-0.5 sm:gap-1",
         outline: "flex flex-col items-center"
     }
 
     const numberClasses = {
         default: "text-xl font-black leading-none",
-        compact: "text-sm font-black leading-none",
+        compact: "text-xs sm:text-sm font-black leading-none tabular-nums",
         outline: "text-2xl font-black leading-none"
     }
 
     const labelClasses = {
         default: "text-[8px] uppercase font-bold opacity-70 mt-1 tracking-tighter",
-        compact: "text-[9px] uppercase font-black opacity-50",
+        compact: "text-[7px] sm:text-[9px] uppercase font-black opacity-50 tracking-tighter",
         outline: "text-[9px] uppercase font-bold opacity-60 mt-1"
     }
 

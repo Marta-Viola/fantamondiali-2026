@@ -4,6 +4,9 @@ import StandardHeader from '@/components/ui/StandardHeader'
 import StandardFooter from '@/components/ui/StandardFooter'
 import MatchList from '@/components/MatchList'
 import LastUpdated from '@/components/ui/LastUpdated'
+import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
+
+export const dynamic = 'force-dynamic'
 
 export default async function PartitePage() {
     const supabase = await createClient()
@@ -30,21 +33,10 @@ export default async function PartitePage() {
     const predictions = predictionsRes.data || []
     const lastSync = settingsRes.data?.last_sync_at
 
-    // // carichiamo i match (già ordinati per tempo)
-    // const { data: matches } = await supabase
-    //     .from('matches')
-    //     .select('*')
-    //     .in('status', ['SCHEDULED', 'LIVE', 'IN_PLAY', 'FINISHED', 'POSTPONED'])
-    //     .order('match_time', { ascending: true })
-
-    // // carichiamo i pronostici dell'utente loggato
-    // const { data: predictions } = await supabase
-    //     .from('predictions')
-    //     .select('*')
-    //     .eq('user_id', user.id)
-
     return (
         <>
+            <RealtimeSettingsListener />
+
             <StandardHeader 
                 title="Calendario 🗓️"
                 subtitle="Risultati e prossimi match"

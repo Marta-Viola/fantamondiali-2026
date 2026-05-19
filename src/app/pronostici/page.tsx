@@ -120,7 +120,7 @@ export default async function PronosticiPage() {
                 className={config.color}
         />
 
-        <div className="bg-slate-50 pb-32">
+        <div className="bg-emerald-50 pb-32">
             <main className="max-w-2xl mx-auto p-4 space-y-6">
 
                 {/* AVVISO STATO */}

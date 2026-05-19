@@ -12,15 +12,6 @@ import { PHASE_SCHEDULE } from '@/constants/phases'
 
 export const dynamic = 'force-dynamic'
 
-// const PHASE_SCHEDULE = {  // non è meglio prendere da phases.ts? anche perché ste date sono sbagliate...
-//   'GIRONI': { nextPhaseLabel: 'Sedicesimi', nextPhaseOpen: '2026-06-11T18:00:00' }, 
-//   'SEDICESIMI': { nextPhaseLabel: 'Ottavi', nextPhaseOpen: '2026-06-15T16:00:00' },
-//   'OTTAVI': { nextPhaseLabel: 'Quarti', nextPhaseOpen: '2026-06-19T21:00:00' },
-//   'QUARTI': { nextPhaseLabel: 'Semifinali', nextPhaseOpen: '2026-06-23T21:00:00' },
-//   'SEMIFINALI': { nextPhaseLabel: 'Finale', nextPhaseOpen: '2026-06-27T21:00:00' },
-//   'FINALE': { nextPhaseLabel: '', nextPhaseOpen: null }
-// } 
-
 export default async function Home() {
   const supabase = await createClient()
   
@@ -54,7 +45,6 @@ export default async function Home() {
   const isClosed = settings ? (settings.is_approved && now > closedAt) : false
 
   const phaseKey = settings?.current_phase as keyof typeof PHASE_SCHEDULE
-  // const phaseLabel = settings?.current_phase.replace(/_/g, ' ') || 'GIRONI'
 
   // helper grammaticale
   const getPhaseTextWithArticle = (key: keyof typeof PHASE_SCHEDULE, gironiCustomText: string) => {
@@ -88,7 +78,6 @@ export default async function Home() {
     }
   } else if (isInitial) {
     // GIALLO
-    // const isGironi = settings?.current_phase === 'GIRONI'
     const targetText = getPhaseTextWithArticle(phaseKey, "I Gironi e le Scommesse Speciali")
     bannerConfig = {
       visible: true,
@@ -100,7 +89,6 @@ export default async function Home() {
     }
   } else if (isOpen) {
     // VERDE
-    // const isGironi = settings?.current_phase === 'GIRONI'
     const targetText = getPhaseTextWithArticle(phaseKey, "I Gironi e le Scommesse Speciali")
     bannerConfig = {
       visible: true,
@@ -112,10 +100,8 @@ export default async function Home() {
     }
   } else if (isClosed) {
     // ROSSO
-    // const phaseKey = settings?.current_phase as keyof typeof PHASE_SCHEDULE
     const phaseData = phaseKey ? PHASE_SCHEDULE[phaseKey] : null
     const nextPhaseDate = phaseData?.nextPhaseOpen
-    // const nextPhaseName = phaseData?.nextPhaseLabel
 
     const phaseKeys = Object.keys(PHASE_SCHEDULE) as (keyof typeof PHASE_SCHEDULE)[]
     const currentIndex = phaseKeys.indexOf(phaseKey)
@@ -137,9 +123,9 @@ export default async function Home() {
     }
   }
 
-  // se l'utente c'è, mostriamo la Dashboard (temporanea)
+  // se l'utente c'è, mostriamo la Dashboard
   return (
-    <main className="min-h-screen bg-slate-50 pb-12">
+    <main className="min-h-screen bg-emerald-50 pb-12">
       <RealtimeSettingsListener />
 
       {/* header dashboard */}
@@ -153,7 +139,7 @@ export default async function Home() {
       </div>
       
       {/* contenitore principale */}
-      <div className="max-w-md mx-auto px-4 -mt-10 space-y-6">
+      <div className="w-full max-w-md sm:max-w-xl mx-auto px-4 -mt-10 space-y-6">
 
         {/* banner fasi dinamico con countdown compatto */}
         {bannerConfig.visible && (
@@ -161,13 +147,17 @@ export default async function Home() {
             href={bannerConfig.link}
             className="block transform active:scale-[0.99] transition-all focus:outline-none"
           >
-            <div className={`p-4 rounded-3xl border flex items-center justify-between gap-3 shadow-lg backdrop-blur-xs ${bannerConfig.color}`}>
-              <p className="text-xs font-black uppercase tracking-tight leading-tight flex-1 text-left">
-                {bannerConfig.title}
-              </p>
+            <div className={`p-3 sm:p-4 rounded-3xl border flex items-center justify-between gap-2 sm:gap-4 shadow-lg backdrop-blur-xs ${bannerConfig.color}`}>
+              
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs font-black uppercase tracking-tight leading-tight text-left break-words">
+                  {bannerConfig.title}
+                </p>
+              </div>
+              
               {/* mostro il countdown solo se non è bloccato */}
               {!isBlocked && (
-                <div className="shrink-0 bg-white/20 p-1 rounded-xl backdrop-blur-xs">
+                <div className="shrink-0 bg-white/20 p-1 sm:p-1.5 rounded-xl backdrop-blur-xs">
                   <Countdown
                     targetDate={bannerConfig.targetDate}
                     variant={bannerConfig.variant}
@@ -205,9 +195,13 @@ export default async function Home() {
           <MatchWidget matches={matches} predictions={predictions} />
           <Link
             href="/pronostici"
-            className="block w-full py-4 bg-emerald-600 text-white rounded-2xl text-center font-black uppercase text-xs shadow-md hover:bg-emerald-700 transition-all active:scale-95"
+            className={`block w-full py-4 rounded-2xl text-center font-black uppercase text-xs shadow-md transition-all active:scale-95 ${
+              isOpen 
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
+                : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+            }`}
           >
-            Inserisci Pronostici ⚽
+            {isOpen ? 'Inserisci Pronostici 🔥' : 'Guarda i tuoi pronostici ⚽'}
           </Link>
         </section>
 

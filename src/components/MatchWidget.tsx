@@ -30,8 +30,8 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
             new Date(a.match_time).getTime() - new Date(b.match_time).getTime()
         )
 
-        const past = sorted.filter(m => m.status === 'FINISHED').slice(-2)
-        const future = sorted.filter(m => m.status !== 'FINISHED').slice(0, 3)
+        const past = sorted.filter(m => m.status?.toLowerCase() === 'finished').slice(-2)
+        const future = sorted.filter(m => m.status?.toLowerCase() !== 'finished').slice(0, 3)
 
         return [...past, ...future]
     }
@@ -39,7 +39,6 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
     const displayMatches = getDisplayMatches()
 
     return (
-        // bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-100
         <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-100">
             <div className="p-5 border-b border-slate-50 flex justify-between items-center">
                 <h2 className="font-black text-slate-800 uppercase tracking-tight text-sm">
@@ -65,14 +64,14 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
                                     <img src={match.away_flag} className="w-5 h-5 rounded-full object-cover border-2 border-white shadow-sm" />
                                 </div>
                                 <div className="truncate">
-                                    <span className="font-black text-xs text-slate-700 uppercase tabular-nums">
+                                    <span className="font-black text-xs text-slate-700 uppercase tabular-nums tracking-tight">
                                         {match.home_tla} - {match.away_tla}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Risultato / Stato */}
-                            <div className="flex flex-col items-center min-w-[60px]">
+                            <div className={`flex flex-col items-center justify-center shrink-0 ${isFinished ? 'min-w-[60px]' : 'w-6 text-center'}`}>
                                 {isFinished ? (
                                     <div className="flex flex-col items-center">
                                         <span className="text-sm font-black text-slate-900">
@@ -85,14 +84,14 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
                                         )}
                                     </div>
                                 ) : (
-                                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">
-                                        In arrivo
+                                    <span className="text-xs opacity-40 select-none animate-pulse" title="In arrivo">
+                                        ⏳
                                     </span>
                                 )}
                             </div>
 
                             {/* Pronostico utente */}
-                            <div className="text-right min-w-[70px]">
+                            <div className="text-right min-w-[65px] shrink-0">
                                 <p className="text-[8px] font-black uppercase text-slate-400 leading-none mb-1">Tuo Pronostico</p>
                                 <p className={`font-black text-xs ${!isFinished ? 'text-emerald-600' : 'text-slate-400'}`}>
                                     {pred ? `${pred.guess_home}-${pred.guess_away}` : '--'}

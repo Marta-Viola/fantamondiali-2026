@@ -17,6 +17,7 @@ interface Bet {
 interface InitialAnswer {
     side_bet_id: string
     answer: string
+    numeric_answer: number | null
 }
 
 interface SideBetsFormProps {
@@ -34,13 +35,23 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
 
     // trasformazione dati
     const formattedInitialData = initialAnswers.reduce((acc, curr) => {
-        acc[curr.side_bet_id] = curr.answer
+        acc[curr.side_bet_id] = curr.answer || ''
         return acc
     }, {} as Record<string, string>)
+
+    const formattedNumericData = initialAnswers.reduce((acc, curr) => {
+        if (curr.numeric_answer !== null && curr.numeric_answer !== undefined) {
+            acc[curr.side_bet_id] = curr.numeric_answer
+        }
+        return acc
+    }, {} as Record<string, number | ''>)
     
     // stato inizializzato
+    // const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
     const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
-    
+    const [numericAnswers, setNumericAnswers] = useState<Record<string, number | ''>>(formattedNumericData)
+
+
     // identifichiamo gli ID per l'automazione (basandoci sulle label)
     const winnerBet = bets.find((b) => b.label.startsWith('Vincitore'))
     const finalScoreBet = bets.find((b) => b.type === 'score')
@@ -77,22 +88,27 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                         setIsOpen(!isOpen)
                         setSearchTerm("")
                     }}
-                    className={`w-full border-2 border-transparent rounded-2xl font-bold text-slate-800 transition-all outline-none flex items-center justify-center relative
+                    className={`w-full border-2 border-transparent rounded-2xl font-black text-slate-800 transition-all outline-none flex items-center justify-center relative
                         ${isOpen ? 'border-emerald-500 bg-white shadow-md' : ''} 
                         ${isLocked 
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-75' 
                             : 'bg-slate-50 hover:bg-slate-100'
                         } 
-                        ${isBig ? 'p-5 text-2xl' : 'p-4 text-sm'}`}
+                        ${isBig 
+                            ? 'py-5 px-10 text-lg sm:text-2xl' 
+                            : 'py-4 px-10 text-xs sm:text-sm'
+                        }`}
                 >
-                    <div className="flex items-center gap-3 justify-center">
+                    <div className="flex items-center gap-2 sm:gap-3 justify-center min-w-0 w-full">
                         {selectedTeam ? (
                             <>
-                                <img src={selectedTeam.flag} alt="flag" className={`object-cover rounded shadow-xs ${isBig ? 'w-10 h-6' : 'w-6 h-4'}`} />
+                                <img src={selectedTeam.flag} alt="flag" className={`object-cover rounded shrink-0 shadow-xs ${isBig ? 'w-10 h-6' : 'w-6 h-4'}`} />
+                                
                                 {/* nome intero sempre visibile su desktop */}
                                 <span className="truncate hidden sm:block">{selectedTeam.name}</span>
+                                
                                 {/* nome su mobile abbreviato solo se forceTla è vero, altrimenti intero */}
-                                <span className="sm:hidden block uppercase tracking-tighter">
+                                <span className="sm:hidden block uppercase tracking-tighter truncate max-w-full">
                                     {forceTla
                                         ? (selectedTeam.tla || selectedTeam.name.substring(0, 3))
                                         : selectedTeam.name
@@ -100,14 +116,16 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                                 </span>
                             </>
                         ) : (
-                            <span className="text-slate-400 font-medium">{isBig ? 'Scegli il Campione' : 'Seleziona...'}</span>
+                            <span className="text-slate-400 font-medium tracking-tight whitespace-nowrap">
+                                {isBig ? 'Scegli il Campione' : 'Seleziona...'}
+                            </span>
                         )}
                     </div>
 
                     {/* Freccetta */}
                     {!isLocked && (
-                        <div className="absolute right-4">
-                            <svg className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                            <svg className={`w-4 h-4 sm:w-5 sm:h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>
@@ -177,7 +195,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
         setIsModalOpen(false)
         setLoading(true)
 
-        const result = await saveSideBets(answers)
+        const result = await saveSideBets(answers, numericAnswers)
 
         if (result.success) {
             router.push('/')
@@ -315,23 +333,52 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                     👟 Chi sarà il capocannoniere?
                 </h2>
                 {topScorerBet && (
-                    <div className={`p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden transition-colors ${isLocked ? 'bg-slate-200 border border-slate-300' : 'bg-slate-800'}`}>
+                    <div className={`p-6 sm:p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden transition-colors ${isLocked ? 'bg-slate-200 border border-slate-300' : 'bg-slate-800'}`}>
                         <div className="absolute -bottom-4 -right-4 text-6xl opacity-10 grayscale pointer-events-none">⚽</div>
-                        <input
-                            type="text"
-                            disabled={isLocked}
-                            placeholder={isLocked ? "Nessun bomber inserito": "Nome e Cognome del bomber..."}
-                            className={`relative z-10 w-full p-5 border-2 rounded-2xl font-bold transition-all text-center outline-none
-                                ${isLocked 
-                                    ? 'bg-slate-100 border-slate-300 text-slate-400 cursor-not-allowed' 
-                                    : 'bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-emerald-400'
-                                }`}
-                            value={answers[topScorerBet.id] || ''}
-                            onChange={(e) => {
-                                if (isLocked) return
-                                setAnswers({...answers, [topScorerBet.id]: e.target.value})
-                            }}
-                        />
+
+                        <div className="flex flex-col sm:flex-row gap-4 relative z-10">
+                            {/* input nome giocatore */}
+                            <input
+                                type="text"
+                                disabled={isLocked}
+                                placeholder={isLocked ? "Nessun bomber inserito": "Nome e Cognome..."}
+                                className={`flex-1 p-5 border-2 rounded-2xl font-bold transition-all text-center sm:text-left outline-none
+                                    ${isLocked 
+                                        ? 'bg-slate-100 border-slate-300 text-slate-400 cursor-not-allowed' 
+                                        : 'bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-emerald-400'
+                                    }`}
+                                value={answers[topScorerBet.id] || ''}
+                                onChange={(e) => {
+                                    if (isLocked) return
+                                    setAnswers({...answers, [topScorerBet.id]: e.target.value})
+                                }}
+                            />
+
+                            {/* input numero reti */}
+                            <div className="flex items-center justify-center sm:justify-start gap-3">
+                                <label className={`text-xs font-black uppercase tracking-widest ${isLocked ? 'text-slate-400' : 'text-white/70'}`}>
+                                    Reti:
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="30"
+                                    disabled={isLocked}
+                                    placeholder="0"
+                                    className={`w-24 p-5 border-2 rounded-2xl font-black text-xl transition-all text-center outline-none
+                                        ${isLocked 
+                                            ? 'bg-slate-100 border-slate-300 text-slate-400 cursor-not-allowed' 
+                                            : 'bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-emerald-400'
+                                        }`}
+                                    value={numericAnswers[topScorerBet.id] !== undefined ? numericAnswers[topScorerBet.id] : ''}
+                                    onChange={(e) => {
+                                        if (isLocked) return
+                                        const val = e.target.value
+                                        setNumericAnswers({...numericAnswers, [topScorerBet.id]: val === '' ? '' : parseInt(val, 10)})
+                                    }}
+                                />
+                            </div>
+                        </div>
                     </div>
                 )}
             </section>

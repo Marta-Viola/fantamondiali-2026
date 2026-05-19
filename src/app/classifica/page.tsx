@@ -5,7 +5,9 @@ import StandardHeader from '@/components/ui/StandardHeader'
 import StandardFooter from '@/components/ui/StandardFooter'
 import RankingTable from '@/components/RankingTable'
 import LastUpdated from '@/components/ui/LastUpdated'
+import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
 
+export const dynamic = 'force-dynamic'
 
 export default async function ClassificaPage() {
     const supabase = await createClient()
@@ -27,16 +29,12 @@ export default async function ClassificaPage() {
     ])
 
     const rankings = rankingsRes.data || []
-    const lastSync = settingsRes.data?.last_sync_at    // const { data: rankings } = await supabase
-    //     .from('profiles')
-    //     .select('*')
-    //     .order('total_points', { ascending: false })
-    //     .order('scores_count', { ascending: false })
-    //     .order('gd_count', { ascending: false })
-    //     .order('username', { ascending: true })
+    const lastSync = settingsRes.data?.last_sync_at
 
     return (
         <>
+            <RealtimeSettingsListener />
+
             <StandardHeader
                 title="Classifica 📊"
                 subtitle="Chi sta dominando il torneo?"

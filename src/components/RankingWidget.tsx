@@ -6,7 +6,7 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
     return (
         <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-100">
             <div className="flex justify-between items-center mb-6 px-2">
-                <h3 className="font-black uppercase italic text-slate-800 text-sm tracking-tight">Top 5 Globale</h3>
+                <h3 className="font-black uppercase italic text-slate-800 text-sm tracking-tight">Classifica Top 5</h3>
                 <Link href="/classifica" className="text-[10px] font-black uppercase text-emerald-600 hover:text-emerald-700 transition-colors">
                     Vedi Tutta →
                 </Link>

@@ -16,8 +16,8 @@ export default function StandardFooter() {
     ]
 
     return (
-        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-2xl bg-white/90 backdrop-blur-md border-t border-emerald-100 z-50 pb-safe shadow-[0_-10px_20px_rgba(6,78,59,0.05)]">
-            <div className="flex justify-around items-end px-2">
+        <nav className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-emerald-100 z-50 pb-safe shadow-[0_-10px_20px_rgba(6,78,59,0.05)]">
+            <div className="flex justify-around items-end px-2 max-w-2xl mx-auto w-full">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href
 

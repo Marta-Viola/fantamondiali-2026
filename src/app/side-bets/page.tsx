@@ -129,7 +129,7 @@ export default async function SideBetsPage() {
                 className={config.color}
             />
 
-        <div className="bg-slate-50 pb-32 min-h-screen">
+        <div className="bg-emerald-50 pb-32 min-h-screen">
             <main className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
 
                 {/* BANNER AVVISO STATO (compare solo se non si può votare) */}

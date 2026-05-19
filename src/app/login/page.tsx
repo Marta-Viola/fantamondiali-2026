@@ -166,6 +166,15 @@ export default function LoginPage() {
                             required
                         />
                     </div>
+
+                    {/* box informativo sul magic link */}
+                    <div className="bg-slate-50 text-slate-600 text-xs p-3 rounded-xl border border-slate-100 flex items-start gap-3 mt-1">
+                        <span className="text-lg leading-none">✨</span>
+                        <p className="leading-tight">
+                            <strong className="text-slate-800">Nessuna password da inventare o ricordare!</strong><br/>
+                            Ti invieremo un <span className="font-bold text-emerald-600">Link Magico</span> via email per entrare in campo in totale sicurezza.
+                        </p>
+                    </div>
                     
                     <button
                         type="submit"
