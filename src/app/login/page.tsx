@@ -77,9 +77,11 @@ export default function LoginPage() {
             }
         }
 
+        const cleanEmail = email.trim().toLowerCase()
+
         // INVIO MAGIC LINK
         const { error } = await supabase.auth.signInWithOtp({
-            email,
+            email: cleanEmail,
             options: {
                 // questo rimanda l'utente al "vigile" che scambia il codice con la sessione
                 emailRedirectTo: `${window.location.origin}/auth/callback`,
