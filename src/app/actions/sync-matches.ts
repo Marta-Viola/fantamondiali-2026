@@ -83,6 +83,13 @@ export async function syncMatches() {
             console.error('Errore Supabase Settings:', settingsError)
         }
 
+        const { error: rpcError } = await supabase.rpc('update_user_points')
+
+        if (rpcError) {
+            console.error('Errore durante il calcolo dei punti:', rpcError)
+            return { success: false, error: 'Partite aggiornate ma calcolo punti fallito'}
+        }
+
         // REVALIDATION
         revalidatePath('/')
         revalidatePath('/classifica')

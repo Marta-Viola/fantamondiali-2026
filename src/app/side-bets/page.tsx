@@ -106,7 +106,7 @@ export default async function SideBetsPage() {
     // recuperiamo le risposte esistenti dell'utente
     const { data: existingAnswers } = await supabase
         .from('user_side_bets')
-        .select('side_bet_id, answer')
+        .select('side_bet_id, answer, numeric_answer')
         .eq('user_id', user.id)
 
     // Recuperiamo TUTTI i dati dei match per estrarre le squadre
