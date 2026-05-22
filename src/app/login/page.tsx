@@ -3,7 +3,7 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function LoginPage() {
     const [isRegistering, setIsRegistering] = useState(true)   // stato per swithcare tra Login e Register
@@ -13,6 +13,14 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState('')
     const supabase = createClient()
+
+    useEffect(() => {
+        const savedEmail = window.localStorage.getItem('fanta_email')
+        if (savedEmail) {
+            setEmail(savedEmail)
+        }
+    }, [])
+    
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -81,6 +89,8 @@ export default function LoginPage() {
                 } : {},
             },
         })
+
+        window.localStorage.setItem('fanta_email', email)
 
         if (error) {
             setMessage(`Errore: ${error.message}`)

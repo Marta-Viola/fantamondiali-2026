@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FantaMondiali 2026",
+  title: "⚽ | FantaMondiali 2026",
   description: "Sfida i tuoi amici e scala la classifica!",
 };
 
