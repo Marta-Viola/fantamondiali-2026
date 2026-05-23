@@ -78,10 +78,10 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
     return (
         <form 
             onSubmit={handleConfirmClick}
-            className="w-full max-w-2xl mx-auto px-4 mt-4 space-y-10 pb-32"
+            className="group w-full max-w-2xl mx-auto px-2 sm:px-4 mt-2 sm:mt-4 space-y-8 pb-32"
         >
             {/* Progress Bar */}
-            <div className={`${isLocked ? 'relative' : 'sticky top-24'} z-30 w-full max-w-2xl mx-auto mb-4 transition-all`}>
+            <div className={`${isLocked ? 'relative' : 'sticky top-[72px] sm:top-[88px]'} z-[50] w-full max-w-2xl mx-auto mb-4 transition-all`}>
                 <div className={`bg-white/95 backdrop-blur-md border p-4 rounded-3xl shadow-md ${isLocked ? 'border-slate-200 bg-slate-50/90' : 'border-emerald-100'}`}>
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
@@ -163,26 +163,25 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            {isLocked ? (
-                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <span className="text-base">🔒</span>
-                    <div className="flex flex-col text-left">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">Scommesse</span>
-                        <span className="text-xs font-black uppercase italic tracking-tight text-slate-200">Fase Chiusa</span>
+            <div className="transition-all duration-300 opacity-100 translate-y-0 group-focus-within:opacity-0 group-focus-within:translate-y-10 group-focus-within:pointer-events-none">
+                {isLocked ? (
+                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <span className="text-base">🔒</span>
+                        <div className="flex flex-col text-left">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">Scommesse</span>
+                            <span className="text-xs font-black uppercase italic tracking-tight text-slate-200">Fase Chiusa</span>
+                        </div>
                     </div>
-                </div>
-            ) : (
-                // <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
+                ) : (
                     <ConfirmButton
                         text="Salva Scommesse"
                         icon="💾"
                         type="submit"
-                        // onClick={() => setIsModalOpen(true)}
                         loading={loading}
                         isFloating={true}
                     />
-                // </div>  // forti dubbi
-            )}
+                )}
+            </div>
             
             {/* POP-UP */}
             {isModalOpen && (
