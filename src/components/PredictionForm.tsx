@@ -81,7 +81,7 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             className="group w-full max-w-2xl mx-auto px-2 sm:px-4 mt-2 sm:mt-4 space-y-8 pb-32"
         >
             {/* Progress Bar */}
-            <div className={`${isLocked ? 'relative' : 'sticky top-[72px] sm:top-[88px]'} z-[50] w-full max-w-2xl mx-auto mb-4 transition-all`}>
+            <div className={`${isLocked ? 'relative' : 'sticky top-[72px] sm:top-[88px]'} z-[70] w-full max-w-2xl mx-auto mb-4 transition-all`}>
                 <div className={`bg-white/95 backdrop-blur-md border p-4 rounded-3xl shadow-md ${isLocked ? 'border-slate-200 bg-slate-50/90' : 'border-emerald-100'}`}>
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
@@ -163,9 +163,9 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            <div className="transition-all duration-300 opacity-100 translate-y-0 group-focus-within:opacity-0 group-focus-within:translate-y-10 group-focus-within:pointer-events-none">
+            <div className="z-[60] relative pointer-events-none">
                 {isLocked ? (
-                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto">
                         <span className="text-base">🔒</span>
                         <div className="flex flex-col text-left">
                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">Scommesse</span>
@@ -173,13 +173,15 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                         </div>
                     </div>
                 ) : (
-                    <ConfirmButton
-                        text="Salva Scommesse"
-                        icon="💾"
-                        type="submit"
-                        loading={loading}
-                        isFloating={true}
-                    />
+                    <div className="pointer-events-auto">
+                        <ConfirmButton
+                            text="Salva Scommesse"
+                            icon="💾"
+                            type="submit"
+                            loading={loading}
+                            isFloating={true}
+                        />
+                    </div>
                 )}
             </div>
             
