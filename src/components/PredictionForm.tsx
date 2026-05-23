@@ -163,9 +163,9 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            <div className="z-[60] relative pointer-events-none">
+            <div className="z-[90] relative pointer-events-none [&>*]:!bottom-28">
                 {isLocked ? (
-                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto">
+                    <div className="fixed left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto">
                         <span className="text-base">🔒</span>
                         <div className="flex flex-col text-left">
                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">Scommesse</span>
@@ -173,7 +173,7 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                         </div>
                     </div>
                 ) : (
-                    <div className="pointer-events-auto">
+                    <div className="pointer-events-auto flex justify-center">
                         <ConfirmButton
                             text="Salva Scommesse"
                             icon="💾"
