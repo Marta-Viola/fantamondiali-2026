@@ -32,14 +32,17 @@ export default function LoginPage() {
         // CONTROLLI DI SICUREZZA E VALIDAZIONE
         if (isRegistering) {
             // Limite lunghezza
-            if (finalUsername.length > 15) {
-                setMessage('Errore: Il nickname è troppo lungo (max 15 caratteri)')
+            if (finalUsername.length > 25) {
+                setMessage('Errore: Il nickname è troppo lungo (max 25 caratteri)')
                 setLoading(false)
                 return
             }
 
             // sanificazione
-            finalUsername = finalUsername.replace(/[^a-zA-Z0-9_]/g, '')
+            finalUsername = finalUsername
+                .replace(/[^\w\s\-àèéìíòóùú]/gi, '')
+                .replace(/\s+/g, ' ')
+                .trim()
 
             if (finalUsername.length < 3) {
                 setMessage('Errore: Il nickname deve avere almeno 3 caratteri validi')
