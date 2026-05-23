@@ -163,7 +163,7 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            <div className="z-[90] relative pointer-events-none [&>*]:!bottom-28">
+            <div className="z-[90] relative pointer-events-none [&_.fixed]:transition-all [&_.fixed]:duration-300 [&_.fixed]:!bottom-24 group-focus-within:[&_.fixed]:!bottom-4">
                 {isLocked ? (
                     <div className="fixed left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto">
                         <span className="text-base">🔒</span>
