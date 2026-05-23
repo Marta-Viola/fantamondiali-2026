@@ -38,11 +38,11 @@ export default function ConfirmButton({
 
     if (isFloating) {
         return (
-            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full flex justify-center px-6 pointer-events-none z-50">
+            <div className="fixed left-1/2 -translate-x-1/2 w-full flex justify-center px-6 pointer-events-none z-[90] transition-all duration-300 bottom-24 group-focus-within:bottom-4">
                 {buttonContent}
             </div>
         );
     }
 
-    return <div className="flex justify-center w-full mt-8">{buttonContent}</div>;
+    return <div className="flex justify-center w-full mt-8 pointer-events-auto">{buttonContent}</div>;
 }

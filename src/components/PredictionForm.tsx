@@ -37,12 +37,12 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
 
         setValues({ ...values, [matchId]: { ...values[matchId], [side]: val } })
 
-        // LOGICA DEL SALTO (focus management)
-        // se l'utente ha inserito un numero, passa all'input successivo
-        if (val !== '') {
-            const nextInput = inputsRef.current[index + 1]
-            if (nextInput) nextInput.focus()
-        }
+        // // LOGICA DEL SALTO (focus management)
+        // // se l'utente ha inserito un numero, passa all'input successivo
+        // if (val !== '') {
+        //     const nextInput = inputsRef.current[index + 1]
+        //     if (nextInput) nextInput.focus()
+        // }
     }
 
     const handleConfirmClick = (e: React.FormEvent) => {
@@ -163,9 +163,9 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            <div className="z-[90] relative pointer-events-none [&_.fixed]:transition-all [&_.fixed]:duration-300 [&_.fixed]:!bottom-24 group-focus-within:[&_.fixed]:!bottom-4">
+            {/* <div className="z-[90] relative pointer-events-none [&_.fixed]:transition-all [&_.fixed]:duration-300 [&_.fixed]:!bottom-24 group-focus-within:[&_.fixed]:!bottom-4"> */}
                 {isLocked ? (
-                    <div className="fixed left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto">
+                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto transition-all duration-300">
                         <span className="text-base">🔒</span>
                         <div className="flex flex-col text-left">
                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">Scommesse</span>
@@ -173,7 +173,7 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                         </div>
                     </div>
                 ) : (
-                    <div className="pointer-events-auto flex justify-center">
+                    // <div className="pointer-events-auto flex justify-center">
                         <ConfirmButton
                             text="Salva Scommesse"
                             icon="💾"
@@ -181,9 +181,9 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                             loading={loading}
                             isFloating={true}
                         />
-                    </div>
+                    // </div>
                 )}
-            </div>
+            {/* </div> */}
             
             {/* POP-UP */}
             {isModalOpen && (
