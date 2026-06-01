@@ -1,11 +1,53 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { savePredictions } from '@/app/actions/save-predictions'
 
 import ConfirmButton from '@/components/ui/ConfirmButton'
 import StandardModal from '@/components/ui/StandardModal'
+
+const TlaToolTip = ({ tla, fullName }: { tla: string, fullName: string }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    const handleTap = (e: React.MouseEvent) => {
+        e.preventDefault()
+        if (isOpen) {
+            setIsOpen(false)
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        } else {
+            setIsOpen(true)
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+            timeoutRef.current = setTimeout(() => {
+                setIsOpen(false)
+            }, 2500)
+        }
+    }
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        }
+    }, [])
+
+    return (
+        <div className="relative inline-flex flex-col items-center sm:hidden shrink-0 cursor-pointer" onClick={handleTap}>
+            <span className="text-[11px] font-black uppercase text-slate-800">
+                {tla}
+            </span>
+
+            {/* la nuvoletta */}
+            {isOpen && (
+                <div className="absolute bottom-full mb-1.5 z-[100] whitespace-nowrap bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-xl animate-in fade-in zoom-in duration-200">
+                    {fullName}
+                    {/* il triangolino rivolto verso il basso */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                </div>
+            )}
+        </div>
+    )
+}
 
 export default function PredictionForm({ matches, existingPredictions, isLocked = false }: any) {
     const [loading, setLoading] = useState(false)
@@ -118,10 +160,16 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                             <span className="text-xs font-black uppercase text-slate-700 hidden sm:inline truncate">
                                 {match.home_team}
                             </span>
-                            {/* Mobile: TLA */}
-                            <span className="text-[11px] sm:text-sm font-black uppercase text-slate-800 sm:hidden shrink-0">
+
+                            {/* Mobile: TLA con Tooltip */}
+                            <TlaToolTip 
+                                tla={match.home_tla || match.home_team.substring(0,3)}
+                                fullName={match.home_team}
+                            />
+
+                            {/* <span className="text-[11px] sm:text-sm font-black uppercase text-slate-800 sm:hidden shrink-0">
                                 {match.home_tla || match.home_team.substring(0,3)}
-                            </span>
+                            </span> */}
                             <img src={match.home_flag} className="w-6 h-4 sm:w-7 sm:h-5 object-cover rounded shadow-xs border border-slate-100 shrink-0" alt="" />
                         </div>
 
@@ -154,9 +202,16 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                             <span className="text-xs font-black uppercase text-slate-700 hidden sm:inline truncate">
                                 {match.away_team}
                             </span>
-                            <span className="text-[11px] sm:text-sm font-black uppercase text-black sm:hidden shrink-0">
+
+                            {/* Mobile: TLA con ToolTip */}
+                            <TlaToolTip
+                                tla={match.away_tla || match.away_team.substring(0,3)}
+                                fullName={match.away_team}
+                            />
+
+                            {/* <span className="text-[11px] sm:text-sm font-black uppercase text-black sm:hidden shrink-0">
                                 {match.away_tla || match.away_team.substring(0,3)}
-                            </span>
+                            </span> */}
                         </div>
                     </div>
                 ))}
