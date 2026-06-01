@@ -99,16 +99,20 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                             : 'py-4 px-10 text-xs sm:text-sm'
                         }`}
                 >
-                    <div className="flex items-center gap-2 sm:gap-3 justify-center min-w-0 w-full">
+                    <div className="flex items-center gap-1.5 sm:gap-3 justify-center min-w-0 w-full px-1 sm:px-0">
                         {selectedTeam ? (
                             <>
-                                <img src={selectedTeam.flag} alt="flag" className={`object-cover rounded shrink-0 shadow-xs ${isBig ? 'w-10 h-6' : 'w-6 h-4'}`} />
+                                <img 
+                                    src={selectedTeam.flag} 
+                                    alt="flag" 
+                                    className={`object-cover rounded-[2px] shrink-0 shadow-xs ${isBig ? 'w-10 h-6' : 'w-4 h-3 sm:w-6 sm:h-4'}`}
+                                />
                                 
                                 {/* nome intero sempre visibile su desktop */}
                                 <span className="truncate hidden sm:block">{selectedTeam.name}</span>
                                 
                                 {/* nome su mobile abbreviato solo se forceTla è vero, altrimenti intero */}
-                                <span className="sm:hidden block uppercase tracking-tighter truncate max-w-full">
+                                <span className="sm:hidden block uppercase tracking-tighter truncate max-w-[80%]">
                                     {forceTla
                                         ? (selectedTeam.tla || selectedTeam.name.substring(0, 3))
                                         : selectedTeam.name
@@ -124,8 +128,8 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
 
                     {/* Freccetta */}
                     {!isLocked && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                            <svg className={`w-4 h-4 sm:w-5 sm:h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className={`absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 items-center pointer-events-none ${!isBig ? 'hidden sm:flex' : 'flex'}`}>
+                            <svg className={`w-3 h-3 sm:w-5 sm:h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>
