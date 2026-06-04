@@ -12,7 +12,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState('')
     
-    // NUOVI STATI PER OTP (Codice a 6 cifre)
+    // NUOVI STATI PER OTP (Codice a 8 cifre)
     const [showOtpInput, setShowOtpInput] = useState(false)
     const [otp, setOtp] = useState('')
     
@@ -104,7 +104,7 @@ export default function LoginPage() {
         setLoading(false)
     }
 
-    // STEP 2: Verifica il codice a 6 cifre e fai il login
+    // STEP 2: Verifica il codice a 8 cifre e fai il login
     const handleVerifyOtp = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
@@ -220,15 +220,15 @@ export default function LoginPage() {
                     // FORM 2: INSERIMENTO CODICE OTP
                     <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4 animate-in fade-in slide-in-from-right-4 duration-300">
                         <div className="bg-slate-50 text-slate-600 text-xs p-3 rounded-xl border border-slate-100 mb-2 text-center">
-                            Abbiamo inviato un codice a 6 cifre a <br/><strong className="text-slate-800">{email}</strong>
+                            Abbiamo inviato un codice a 8 cifre a <br/><strong className="text-slate-800">{email}</strong>
                         </div>
                         
                         <div className="flex flex-col gap-1">
                             <input
                                 type="text"
                                 inputMode="numeric"
-                                maxLength={6}
-                                placeholder="123456"
+                                maxLength={8}
+                                placeholder="12345678"
                                 // Stile per far sembrare l'input un vero codice PIN
                                 className="p-4 border-2 border-slate-200 rounded-xl text-slate-900 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-300 text-center text-3xl font-black tracking-[0.5em]"
                                 value={otp}
@@ -240,7 +240,7 @@ export default function LoginPage() {
 
                         <button
                             type="submit"
-                            disabled={loading || otp.length < 6}
+                            disabled={loading || otp.length < 8}
                             className="bg-emerald-600 text-white p-4 rounded-xl font-bold text-lg hover:bg-emerald-700 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-lg shadow-emerald-200 transition-all mt-2 flex items-center justify-center gap-2"
                         >
                             {loading ? (
