@@ -9,6 +9,7 @@ import LastUpdated from '@/components/ui/LastUpdated'
 import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
 import Countdown from '@/components/ui/Countdown'
 import { PHASE_SCHEDULE } from '@/constants/phases'
+import LogoutButton from '@/components/ui/LogoutButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -130,6 +131,8 @@ export default async function Home() {
 
       {/* header dashboard */}
       <div className="bg-emerald-600 text-white pt-10 pb-16 px-6 rounded-b-[3.5rem] shadow-lg text-center">
+        <LogoutButton className="absolute top-8 right-6"/>
+        
         <h1 className="text-2xl font-black uppercase italic tracking-tighter">
           FantaMondiali 2026
         </h1>
