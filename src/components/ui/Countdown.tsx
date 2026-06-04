@@ -9,6 +9,7 @@ interface CountdownProps {
 }
 
 export default function Countdown({ targetDate, onEnd, variant = 'default' }: CountdownProps) {
+    const [mounted, setMounted] = useState(false)
     const [timeLeft, setTimeLeft] = useState({
         days: 0,
         hours: 0,
@@ -37,6 +38,9 @@ export default function Countdown({ targetDate, onEnd, variant = 'default' }: Co
     }, [targetDate, onEnd, timeLeft.isExpired])
 
     useEffect(() => {
+        setMounted(true)
+        setTimeLeft(calculateTime()) // Inizializza subito con il tempo corretto!
+
         const timer = setInterval(() => {
             setTimeLeft(calculateTime())
         }, 1000)
@@ -44,9 +48,10 @@ export default function Countdown({ targetDate, onEnd, variant = 'default' }: Co
         return () => clearInterval(timer)
     }, [calculateTime])
 
-    if (timeLeft.isExpired) return null
+    // Evita l'Hydration Mismatch aspettando il caricamento sul client
+    if (!mounted || timeLeft.isExpired) return null
 
-    // Formattazione della data in italiano (es: "10 giugno alle 21:00")
+    // Formattazione della data in italiano, ora sicura al 100%
     const dateObj = new Date(targetDate)
     const formattedDate = dateObj.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })
     const formattedTime = dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
@@ -90,7 +95,7 @@ export default function Countdown({ targetDate, onEnd, variant = 'default' }: Co
             
             {/* Etichetta per versione Standard / Outline */}
             {variant !== 'compact' && (
-                <div className="text-[11px] sm:text-xs font-bold uppercase tracking-widest opacity-90 text-center bg-black/10 px-3 py-1.5 rounded-full inline-block backdrop-blur-sm border border-white/10">
+                <div className="text-[11px] sm:text-xs font-bold uppercase tracking-widest opacity-90 text-center bg-black/10 px-3 py-1.5 rounded-full inline-block backdrop-blur-sm border border-white/10 text-inherit text-white">
                     ⏳ Scade il {formattedDate} alle {formattedTime}
                 </div>
             )}
