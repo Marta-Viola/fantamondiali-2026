@@ -1,4 +1,4 @@
-import LogoutButton from './LogoutButton' // Assicurati che il percorso sia corretto
+import LogoutButton from './LogoutButton'
 
 interface HeaderProps {
     title: string
