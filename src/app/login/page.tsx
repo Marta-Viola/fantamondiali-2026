@@ -229,10 +229,8 @@ export default function LoginPage() {
                                 inputMode="numeric"
                                 maxLength={8}
                                 placeholder="12345678"
-                                // Stile per far sembrare l'input un vero codice PIN
-                                className="p-4 border-2 border-slate-200 rounded-xl text-slate-900 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-300 text-center text-3xl font-black tracking-[0.5em]"
+                                className="w-full p-3 sm:p-4 border-2 border-slate-200 rounded-xl text-slate-900 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-300 text-center text-xl sm:text-3xl font-black tracking-[0.2em] sm:tracking-[0.5em]"
                                 value={otp}
-                                // Espressione regolare per forzare solo numeri
                                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                                 required
                             />

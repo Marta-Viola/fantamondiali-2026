@@ -46,6 +46,11 @@ export default function Countdown({ targetDate, onEnd, variant = 'default' }: Co
 
     if (timeLeft.isExpired) return null
 
+    // Formattazione della data in italiano (es: "10 giugno alle 21:00")
+    const dateObj = new Date(targetDate)
+    const formattedDate = dateObj.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })
+    const formattedTime = dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+
     // classi dinamiche in base alla variante scelta
     const containerClasses = {
         default: "flex gap-3 justify-center",
@@ -81,11 +86,28 @@ export default function Countdown({ targetDate, onEnd, variant = 'default' }: Co
     )
 
     return (
-        <div className={containerClasses[variant]}>
-            {timeLeft.days > 0 && <TimeUnit value={timeLeft.days} label="gg" />}
-            <TimeUnit value={timeLeft.hours} label="ore" />
-            <TimeUnit value={timeLeft.minutes} label="min" />
-            <TimeUnit value={timeLeft.seconds} label="sec" />
+        <div className={variant === 'compact' ? "flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3" : "flex flex-col items-center gap-3"}>
+            
+            {/* Etichetta per versione Standard / Outline */}
+            {variant !== 'compact' && (
+                <div className="text-[11px] sm:text-xs font-bold uppercase tracking-widest opacity-90 text-center bg-black/10 px-3 py-1.5 rounded-full inline-block backdrop-blur-sm border border-white/10">
+                    ⏳ Scade il {formattedDate} alle {formattedTime}
+                </div>
+            )}
+
+            {/* Etichetta per versione Compact (Dashboard) */}
+            {variant === 'compact' && (
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold opacity-80 tracking-wider">
+                    ⏳ Entro il {formattedDate} ({formattedTime})
+                </span>
+            )}
+            
+            <div className={containerClasses[variant]}>
+                {timeLeft.days > 0 && <TimeUnit value={timeLeft.days} label="gg" />}
+                <TimeUnit value={timeLeft.hours} label="ore" />
+                <TimeUnit value={timeLeft.minutes} label="min" />
+                <TimeUnit value={timeLeft.seconds} label="sec" />
+            </div>
         </div>
     )
 }
