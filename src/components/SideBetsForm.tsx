@@ -47,10 +47,8 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
     }, {} as Record<string, number | ''>)
     
     // stato inizializzato
-    // const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
     const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
     const [numericAnswers, setNumericAnswers] = useState<Record<string, number | ''>>(formattedNumericData)
-
 
     // identifichiamo gli ID per l'automazione (basandoci sulle label)
     const winnerBet = bets.find((b) => b.label.startsWith('Vincitore'))
@@ -58,8 +56,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
     const finalistBets = bets.filter((b) => b.label.startsWith('Finalista'))
     const semiBets = bets.filter((b: any) => b.label.startsWith('Semifinalista'))
     const topScorerBet = bets.find((b) => b.label.startsWith('Capocannoniere'))
-
-    // const getFlag = (teamName: string) => teams.find((t: any) => t.name === teamName)?.flag
 
     const handleTeamChange = (betId: string, teamName: string) => {
         if (isLocked) return
@@ -232,10 +228,10 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                 </div>
             </section>
 
-            {/* SEZIONE FINALE */}
-            <section className="relative z-20">
+            {/* SEZIONE FINALE + RISULTATO ESATTO */}
+            <section className="relative z-20 space-y-6">
                 <h2 className="text-xl font-black uppercase tracking-tighter mb-4 text-center text-slate-800">
-                    ⚔️ Chi va in finale?
+                    ⚔️ La Finalissima
                 </h2>
                 <div className="flex flex-col sm:flex-row items-center gap-4 relative">
                     {finalistBets.map((bet, idx) => (
@@ -246,10 +242,63 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                             <TeamSelect bet={bet} />
                         </div>
                     ))}
-                    <div className="flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800 text-white w-10 h-10 rounded-full items-center justify-center font-black text-xs border-4 border-slate-50 z-30 shadow-md">
+                    <div className="flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:-translate-y-6 bg-slate-800 text-white w-10 h-10 rounded-full items-center justify-center font-black text-xs border-4 border-slate-50 z-30 shadow-md">
                         VS
                     </div>
                 </div>
+
+                {/* risultato esatto */}
+                {finalScoreBet && (
+                    <div className={`p-6 bg-white rounded-3xl border border-slate-100 shadow-xs text-center transition-all ${isLocked ? 'bg-slate-50' : ''}`}>
+                        <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${isLocked ? 'text-slate-400' : 'text-emerald-600'}`}>
+                            {finalScoreBet.label}
+                        </p>
+
+                        <div className="flex items-center justify-center gap-4">
+                            {/* input casa */}
+                            <input
+                                type="number"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                disabled={isLocked}
+                                value={(answers[finalScoreBet.id] || "0-0").split("-")[0]}
+                                onChange={(e) => {
+                                    if (isLocked) return
+                                    const val = e.target.value.replace(/\D/g, "") || "0"
+                                    const current = (answers[finalScoreBet.id] || "0-0").split("-")
+                                    setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${val}-${current[1]}` }))
+                                }}
+                                className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
+                                    ${isLocked 
+                                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
+                                        : 'bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100 text-slate-800'
+                                    }`}
+                            />
+
+                            <span className={`text-2xl font-black ${isLocked ? 'text-slate-300' : 'text-emerald-400'}`}>-</span>
+
+                            {/* input ospite */}
+                            <input
+                                type="number"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                disabled={isLocked}
+                                value={(answers[finalScoreBet.id] || "0-0").split("-")[1]}
+                                onChange={(e) => {
+                                    if (isLocked) return
+                                    const val = e.target.value.replace(/\D/g, "") || "0"
+                                    const current = (answers[finalScoreBet.id] || "0-0").split("-")
+                                    setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${current[0]}-${val}` }))
+                                }}
+                                className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
+                                    ${isLocked 
+                                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
+                                        : 'bg-slate-50 border-slate-200 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100 text-slate-800'
+                                    }`}
+                            />                                    
+                        </div>
+                    </div>
+                )}
             </section>
             
             {/* SEZIONE VINCITORE */}
@@ -268,65 +317,12 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl pointer-events-none">✨</div>
 
                         {/* campo vincitore */}
-                        <div className="mb-8">
+                        <div>
                             <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${isLocked ? 'text-slate-400' : 'text-amber-600'}`}>
                                 Chi alzerà la coppa?
                             </p>
                             <TeamSelect bet={winnerBet} isBig={true} />
                         </div>
-
-                        {/* risultato esatto */}
-                        {finalScoreBet && (
-                            <div className={`pt-6 border-t-2 relative z-10 ${isLocked ? 'border-slate-200/60' : 'border-amber-200/50'}`}>
-                                <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${isLocked ? 'text-slate-400' : 'text-amber-600'}`}>
-                                    {finalScoreBet.label}
-                                </p>
-
-                                <div className="flex items-center justify-center gap-4">
-                                    {/* input casa */}
-                                    <input
-                                        type="number"
-                                        inputMode="numeric"
-                                        pattern="[0-9]*"
-                                        disabled={isLocked}
-                                        value={(answers[finalScoreBet.id] || "0-0").split("-")[0]}
-                                        onChange={(e) => {
-                                            if (isLocked) return
-                                            const val = e.target.value.replace(/\D/g, "") || "0"
-                                            const current = (answers[finalScoreBet.id] || "0-0").split("-")
-                                            setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${val}-${current[1]}` }))
-                                        }}
-                                        className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
-                                            ${isLocked 
-                                                ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
-                                                : 'bg-white border-amber-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 text-slate-800'
-                                            }`}
-                                    />
-
-                                    <span className={`text-2xl font-black ${isLocked ? 'text-slate-300' : 'text-amber-400'}`}>-</span>
-
-                                    {/* input ospite */}
-                                    <input
-                                        type="number"
-                                        inputMode="numeric"
-                                        pattern="[0-9]*"
-                                        disabled={isLocked}
-                                        value={(answers[finalScoreBet.id] || "0-0").split("-")[1]}
-                                        onChange={(e) => {
-                                            if (isLocked) return
-                                            const val = e.target.value.replace(/\D/g, "") || "0"
-                                            const current = (answers[finalScoreBet.id] || "0-0").split("-")
-                                            setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${current[0]}-${val}` }))
-                                        }}
-                                        className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
-                                            ${isLocked 
-                                                ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
-                                                : 'bg-white border-amber-200 focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 text-slate-800'
-                                            }`}
-                                    />                                    
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
             </section>
@@ -398,7 +394,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                     text="Salva Scommesse"
                     icon="💾"
                     type="submit"
-                    // onClick={() => setIsModalOpen(true)}
                     loading={loading}
                     isFloating={false}
                 />

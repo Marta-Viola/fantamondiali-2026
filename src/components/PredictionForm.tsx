@@ -116,7 +116,7 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             className="group w-full max-w-2xl mx-auto px-2 sm:px-4 mt-2 sm:mt-4 space-y-8 pb-32"
         >
             {/* Progress Bar */}
-            <div className={`${isLocked ? 'relative' : 'sticky top-[72px] sm:top-[88px]'} ${isModalOpen ? 'z-0' : 'z-[70]'} w-full max-w-2xl mx-auto mb-4 transition-all`}>
+            <div className={`${isModalOpen ? 'hidden' : 'block'} ${isLocked ? 'relative' : 'sticky top-[72px] sm:top-[88px]'} z-[70] w-full max-w-2xl mx-auto mb-4 transition-all`}>
                 <div className={`bg-white/95 backdrop-blur-md border p-4 rounded-3xl shadow-md ${isLocked ? 'border-slate-200 bg-slate-50/90' : 'border-emerald-100'}`}>
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
@@ -207,8 +207,8 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            {!isModalOpen && (
-                isLocked ? (
+            <div className={isModalOpen ? 'hidden' : 'block'}>
+                {isLocked ? (
                     <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto transition-all duration-300">
                         <span className="text-base">🔒</span>
                         <div className="flex flex-col text-left">
@@ -224,22 +224,24 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                         loading={loading}
                         isFloating={true}
                     />
-                )
-            )}
-            
+                )}
+            </div>
+
             {/* POP-UP */}
             {isModalOpen && (
-                <StandardModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    onConfirm={onFinalSave}
-                    loading={loading}
-                    emoji="⚽"
-                    title="Confermi le scelte?"
-                    description={
-                        <>I tuoi pronostici verranno registrati. Potrai modificarli liberamente fino alla chiusura ufficiale del mercato di questa fase.</>
-                    }
-                />
+                <div className="fixed inset-0 z-[99999]">
+                    <StandardModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        onConfirm={onFinalSave}
+                        loading={loading}
+                        emoji="⚽"
+                        title="Confermi le scelte?"
+                        description={
+                            <>I tuoi pronostici verranno registrati. Potrai modificarli liberamente fino alla chiusura ufficiale del mercato di questa fase.</>
+                        }
+                    />
+                </div>
             )}
         </form>
     )
