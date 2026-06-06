@@ -78,13 +78,6 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
         if (val.length > 2) return
 
         setValues({ ...values, [matchId]: { ...values[matchId], [side]: val } })
-
-        // // LOGICA DEL SALTO (focus management)
-        // // se l'utente ha inserito un numero, passa all'input successivo
-        // if (val !== '') {
-        //     const nextInput = inputsRef.current[index + 1]
-        //     if (nextInput) nextInput.focus()
-        // }
     }
 
     const handleConfirmClick = (e: React.FormEvent) => {
@@ -123,7 +116,7 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
             className="group w-full max-w-2xl mx-auto px-2 sm:px-4 mt-2 sm:mt-4 space-y-8 pb-32"
         >
             {/* Progress Bar */}
-            <div className={`${isLocked ? 'relative' : 'sticky top-[72px] sm:top-[88px]'} z-[70] w-full max-w-2xl mx-auto mb-4 transition-all`}>
+            <div className={`${isLocked ? 'relative' : 'sticky top-[72px] sm:top-[88px]'} ${isModalOpen ? 'z-0' : 'z-[70]'} w-full max-w-2xl mx-auto mb-4 transition-all`}>
                 <div className={`bg-white/95 backdrop-blur-md border p-4 rounded-3xl shadow-md ${isLocked ? 'border-slate-200 bg-slate-50/90' : 'border-emerald-100'}`}>
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
@@ -208,18 +201,14 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                                 tla={match.away_tla || match.away_team.substring(0,3)}
                                 fullName={match.away_team}
                             />
-
-                            {/* <span className="text-[11px] sm:text-sm font-black uppercase text-black sm:hidden shrink-0">
-                                {match.away_tla || match.away_team.substring(0,3)}
-                            </span> */}
                         </div>
                     </div>
                 ))}
             </div>
             
             {/* Pulsante Salva Fluttuante */}
-            {/* <div className="z-[90] relative pointer-events-none [&_.fixed]:transition-all [&_.fixed]:duration-300 [&_.fixed]:!bottom-24 group-focus-within:[&_.fixed]:!bottom-4"> */}
-                {isLocked ? (
+            {!isModalOpen && (
+                isLocked ? (
                     <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-slate-900/95 backdrop-blur-md text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800 pointer-events-auto transition-all duration-300">
                         <span className="text-base">🔒</span>
                         <div className="flex flex-col text-left">
@@ -228,17 +217,15 @@ export default function PredictionForm({ matches, existingPredictions, isLocked 
                         </div>
                     </div>
                 ) : (
-                    // <div className="pointer-events-auto flex justify-center">
-                        <ConfirmButton
-                            text="Salva Scommesse"
-                            icon="💾"
-                            type="submit"
-                            loading={loading}
-                            isFloating={true}
-                        />
-                    // </div>
-                )}
-            {/* </div> */}
+                    <ConfirmButton
+                        text="Salva Scommesse"
+                        icon="💾"
+                        type="submit"
+                        loading={loading}
+                        isFloating={true}
+                    />
+                )
+            )}
             
             {/* POP-UP */}
             {isModalOpen && (
