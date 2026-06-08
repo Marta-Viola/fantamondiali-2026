@@ -135,7 +135,7 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     {/* Colonna risultati esatti */}
                                     <td className="py-3 px-1 align-middle text-center">
                                         <div className="flex items-center justify-center h-full">
-                                            <span className={`inline-flex items-center justify-center text-[9px] sm:text-xs px-1 py-0.5 rounded-md font-bold
+                                            <span className={`inline-flex items-center justify-center text-[10px] sm:text-xs px-1 py-0.5 rounded-md
                                                 ${isIndovino 
                                                     ? 'bg-purple-100 text-purple-700 font-black scale-105 shadow-xs' 
                                                     : 'text-slate-500 font-medium'
