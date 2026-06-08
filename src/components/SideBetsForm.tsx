@@ -308,7 +308,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                 </h2>
 
                 {winnerBet && (
-                    <div className={`p-8 rounded-[3rem] border-4 shadow-lg relative overflow-hidden transition-all
+                    <div className={`p-8 rounded-[3rem] border-4 shadow-lg relative transition-all
                         ${isLocked 
                             ? 'from-slate-50 to-white bg-gradient-to-b border-slate-200' 
                             : 'from-amber-50 to-white bg-gradient-to-b border-amber-400 shadow-[0_20px_50px_rgba(251,191,36,0.2)]'
