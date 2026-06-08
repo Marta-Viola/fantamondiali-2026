@@ -20,30 +20,30 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
     
     return (
         <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-xl overflow-hidden border border-emerald-100">
-            <div className="w-full overflow-x-auto custom-scrollbar pb-2">
-                <table className="w-full text-left border-collapse min-w-[450px] sm:min-w-full">
+            <div className="w-full pb-2">
+                <table className="w-full text-left border-collapse table-auto">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="py-4 px-2 sm:px-8 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-12 sm:w-24">
+                            <th className="py-3 px-1 sm:px-8 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-7 sm:w-24">
                                 <span className="hidden sm:inline">Pos.</span>
                                 <span className="sm:hidden">#</span>
                             </th>
-                            <th className="py-4 px-2 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400">
+                            <th className="py-3 px-1 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400">
                                 Nickname
                             </th>
-                            <th className="py-4 px-1 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-10 sm:w-20">
+                            <th className="py-3 px-0 sm:px-4 text-[8px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-5 sm:w-20">
                                 <span className="hidden sm:inline">Esiti</span>
                                 <span className="sm:hidden">E</span>
                             </th>
-                            <th className="py-4 px-1 sm:px-2 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-10 sm:w-20">
+                            <th className="py-3 px-0 sm:px-2 text-[8px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-5 sm:w-20">
                                 <span className="hidden sm:inline">Scarti</span>
                                 <span className="sm:hidden">S</span>
                             </th>
-                            <th className="py-4 px-1 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-10 sm:w-20">
+                            <th className="py-3 px-0 sm:px-4 text-[8px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-5 sm:w-20">
                                 <span className="hidden sm:inline">Risultati</span>
                                 <span className="sm:hidden">R</span>
                             </th>
-                            <th className="py-4 px-2 sm:px-8 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-14 sm:w-28">
+                            <th className="py-3 px-1 sm:px-8 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-10 sm:w-28">
                                 Punti
                             </th>
                         </tr>
@@ -76,17 +76,14 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     `}
                                 >
                                     {/* Colonna Posizione */}
-                                    <td className="py-4 px-2 sm:px-8 text-center">
-                                        <div className="flex items-center justify-center gap-1 sm:gap-2">
-                                            {/* mostra il numero solo se ha punti */}
-                                            <span className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[10px] sm:text-sm shrink-0 ${rankBadgeStyle}`}>
+                                    <td className="py-3 px-1 sm:px-8 text-center">
+                                        <div className="flex items-center justify-center gap-0.5 sm:gap-2">
+                                            <span className={`w-5 h-5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[9px] sm:text-sm shrink-0 ${rankBadgeStyle}`}>
                                                 {hasPoints ? currentRank : '-'}
                                             </span>
-
-                                            {/* mostra le freccette solo se ha punti e c'è stato un cambiamento */}
-                                            <div className="w-3 flex items-center justify-start">
+                                            <div className="w-2 flex items-center justify-start">
                                                 {hasPoints && diff !== 0 && (
-                                                    <span className={`${diff > 0 ? 'text-emerald-500' : 'text-rose-500'} text-[10px] sm:text-xs font-bold`}>
+                                                    <span className={`${diff > 0 ? 'text-emerald-500' : 'text-rose-500'} text-[8px] sm:text-xs font-bold`}>
                                                         {diff > 0 ? '▲' : '▼'}
                                                     </span>
                                                 )}
@@ -95,9 +92,9 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     </td>
                                     
                                     {/* Colonna Nickname */}
-                                    <td className="py-4 px-2 sm:px-4">
+                                    <td className="py-3 px-1 sm:px-4">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                                            <span className={`text-[11px] sm:text-sm truncate max-w-[130px] sm:max-w-none 
+                                            <span className={`text-[11px] sm:text-sm truncate max-w-[85px] xs:max-w-[120px] sm:max-w-none 
                                                 ${isMe ? 'font-black text-emerald-700' : ''}
                                                 ${isIndovino && !isMe ? 'font-black text-purple-900' : ''}
                                                 ${!isMe && !isIndovino ? 'font-bold text-slate-700' : ''}
@@ -112,38 +109,39 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                                 </span>
                                             )}
 
-                                            {/* Tag Indovino */}
+                                            {/* Tag Indovino abbreviato su mobile per salvare spazio */}
                                             {isIndovino && (
-                                                <span className="text-[7px] sm:text-[8px] bg-purple-100 text-purple-700 px-1.5 py-0.5 w-fit rounded-md font-black uppercase tracking-tight shrink-0 flex items-center gap-0.5">
-                                                    🔮 Indovino
+                                                <span className="text-[7px] sm:text-[8px] bg-purple-100 text-purple-700 px-1 py-0.5 w-fit rounded-md font-black uppercase tracking-tight shrink-0 flex items-center gap-0.5">
+                                                    <span className="sm:hidden">🔮</span>
+                                                    <span className="hidden sm:inline">🔮 Indovino</span>
                                                 </span>
                                             )}
                                         </div>
                                     </td>
 
-                                    {/* colonne statistiche */}
-                                    <td className="py-4 px-1 text-center text-slate-500 font-medium text-[10px] sm:text-xs">
+                                    {/* colonne statistiche ultracompatte */}
+                                    <td className="py-3 px-0 text-center text-slate-500 font-medium text-[10px] sm:text-xs">
                                         {user.outcomes_count}
                                     </td>
-                                    <td className="py-4 px-1 text-center text-emerald-500 font-bold text-[10px] sm:text-xs">
+                                    <td className="py-3 px-0 text-center text-emerald-500 font-bold text-[10px] sm:text-xs">
                                         {user.gd_count}
                                     </td>
 
                                     {/* colonna risultati esatti */}
-                                    <td className="py-4 px-1 text-center">
-                                        <span className={`inline-block text-[10px] sm:text-xs px-2 py-0.5 rounded-md font-bold
+                                    <td className="py-3 px-0 text-center">
+                                        <span className={`inline-block text-[9px] sm:text-xs px-1 py-0.5 rounded-md font-bold
                                             ${isIndovino 
                                                 ? 'bg-purple-100 text-purple-700 font-black scale-105 shadow-xs' 
                                                 : 'text-slate-500 font-medium'
                                             }`}
-                                            >
-                                                {isIndovino ? `🔮 ${user.scores_count}` : user.scores_count}
+                                        >
+                                            {isIndovino ? `🔮 ${user.scores_count}` : user.scores_count}
                                         </span>
                                     </td>
                                     
                                     {/* Colonna punteggio totale */}
-                                    <td className="py-4 px-2 sm:px-8 text-center">
-                                        <span className={`inline-block min-w-[30px] sm:min-w-[45px] px-2 sm:px-4 py-1 rounded-xl font-black text-[11px] sm:text-sm ${isMe ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                                    <td className="py-3 px-1 sm:px-8 text-center">
+                                        <span className={`inline-block min-w-[24px] sm:min-w-[45px] px-1 sm:px-4 py-1 rounded-xl font-black text-[10px] sm:text-sm ${isMe ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
                                             {user.total_points}
                                         </span>
                                     </td>
