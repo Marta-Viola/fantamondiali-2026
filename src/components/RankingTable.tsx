@@ -77,7 +77,7 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     `}
                                 >
                                     {/* Colonna Posizione */}
-                                    <td className="py-3 px-1 sm:px-4 text-center">
+                                    <td className="py-3 px-1 sm:px-4 align-middle">
                                         <div className="flex items-center justify-center gap-0.5 sm:gap-2">
                                             <span className={`w-5 h-5 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black text-[9px] sm:text-sm shrink-0 ${rankBadgeStyle}`}>
                                                 {hasPoints ? currentRank : '-'}
@@ -93,9 +93,8 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     </td>
                                     
                                     {/* Colonna Nickname */}
-                                    <td className="py-3 px-2 sm:px-4">
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                                            {/* Rimosso max-w, ora sfrutta tutto il w-full della cella */}
+                                    <td className="py-3 px-2 sm:px-4 align-middle">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0 h-full">
                                             <span className={`text-[11px] sm:text-sm truncate w-full
                                                 ${isMe ? 'font-black text-emerald-700' : ''}
                                                 ${isIndovino && !isMe ? 'font-black text-purple-900' : ''}
@@ -121,31 +120,39 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                         </div>
                                     </td>
 
-                                    {/* colonne statistiche allineate */}
-                                    <td className="py-3 px-1 text-center text-slate-500 font-medium text-[10px] sm:text-xs">
-                                        {user.outcomes_count}
+                                    {/* Colonne statistiche allineate verticalmente perfette */}
+                                    <td className="py-3 px-1 align-middle text-center text-slate-500 font-medium text-[10px] sm:text-xs">
+                                        <div className="flex items-center justify-center h-full">
+                                            {user.outcomes_count}
+                                        </div>
                                     </td>
-                                    <td className="py-3 px-1 text-center text-emerald-500 font-bold text-[10px] sm:text-xs">
-                                        {user.gd_count}
+                                    <td className="py-3 px-1 align-middle text-center text-emerald-500 font-bold text-[10px] sm:text-xs">
+                                        <div className="flex items-center justify-center h-full">
+                                            {user.gd_count}
+                                        </div>
                                     </td>
 
-                                    {/* colonna risultati esatti */}
-                                    <td className="py-3 px-1 text-center">
-                                        <span className={`inline-block text-[9px] sm:text-xs px-1 py-0.5 rounded-md font-bold
-                                            ${isIndovino 
-                                                ? 'bg-purple-100 text-purple-700 font-black scale-105 shadow-xs' 
-                                                : 'text-slate-500 font-medium'
-                                            }`}
-                                        >
-                                            {isIndovino ? `🔮 ${user.scores_count}` : user.scores_count}
-                                        </span>
+                                    {/* Colonna risultati esatti */}
+                                    <td className="py-3 px-1 align-middle text-center">
+                                        <div className="flex items-center justify-center h-full">
+                                            <span className={`inline-flex items-center justify-center text-[9px] sm:text-xs px-1 py-0.5 rounded-md font-bold
+                                                ${isIndovino 
+                                                    ? 'bg-purple-100 text-purple-700 font-black scale-105 shadow-xs' 
+                                                    : 'text-slate-500 font-medium'
+                                                }`}
+                                            >
+                                                {isIndovino ? `🔮 ${user.scores_count}` : user.scores_count}
+                                            </span>
+                                        </div>
                                     </td>
                                     
                                     {/* Colonna punteggio totale */}
-                                    <td className="py-3 px-1 sm:px-4 text-center">
-                                        <span className={`inline-block min-w-[24px] sm:min-w-[45px] px-1 sm:px-4 py-1 rounded-xl font-black text-[10px] sm:text-sm ${isMe ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                                            {user.total_points}
-                                        </span>
+                                    <td className="py-3 px-1 sm:px-4 align-middle text-center">
+                                        <div className="flex items-center justify-center h-full">
+                                            <span className={`inline-flex items-center justify-center min-w-[24px] sm:min-w-[45px] px-1 sm:px-4 py-1 rounded-xl font-black text-[10px] sm:text-sm ${isMe ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                                                {user.total_points}
+                                            </span>
+                                        </div>
                                     </td>
                                 </tr>
                             )
