@@ -20,8 +20,8 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
     
     return (
         <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-xl overflow-hidden border border-emerald-100">
-            <div className="w-full">
-                <table className="w-full text-left border-collapse table-fixed sm:table-auto">
+            <div className="w-full overflow-x-auto custom-scrollbar pb-2">
+                <table className="w-full text-left border-collapse min-w-[450px] sm:min-w-full">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
                             <th className="py-4 px-2 sm:px-8 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-12 sm:w-24">
@@ -97,7 +97,7 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     {/* Colonna Nickname */}
                                     <td className="py-4 px-2 sm:px-4">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                                            <span className={`text-[11px] sm:text-sm truncate max-w-[55px] xs:max-w-[75px] sm:max-w-none 
+                                            <span className={`text-[11px] sm:text-sm truncate max-w-[130px] sm:max-w-none 
                                                 ${isMe ? 'font-black text-emerald-700' : ''}
                                                 ${isIndovino && !isMe ? 'font-black text-purple-900' : ''}
                                                 ${!isMe && !isIndovino ? 'font-bold text-slate-700' : ''}
