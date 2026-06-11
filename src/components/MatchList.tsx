@@ -143,8 +143,8 @@ export default function MatchList({ matches, predictions }: { matches: Match[], 
                                             <div className="space-y-3">
                                                 {dayMatches.map((match: Match) => {
                                                     const pred = predictions.find(p => p.match_id === match.id)
-                                                    const isFinished = match.status?.toLowerCase() === 'finished'
-
+                                                    // Mostra finito SOLO se ci sono anche i gol effettivi
+                                                    const isFinished = match.status?.toLowerCase() === 'finished' && match.home_score !== null && match.away_score !== null
                                                     return (
                                                         <div key={match.id} className="bg-white rounded-[1.5rem] p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center gap-4 transition-transform hover:scale-[1.01]">
 

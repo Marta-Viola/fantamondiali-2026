@@ -52,8 +52,8 @@ export default function MatchWidget({ matches, predictions }: { matches: Match[]
             <div className="divide-y divide-slate-50">
                 {displayMatches.map((match) => {
                     const pred = predictions.find(p => p.match_id === match.id)
-                    const isFinished = match.status === 'finished'
-
+                    // Mostra finito SOLO se ci sono anche i gol effettivi
+                    const isFinished = match.status?.toLowerCase() === 'finished' && match.home_score !== null && match.away_score !== null
                     return (
                         <div key={match.id} className={`p-4 flex items-center justify-between gap-4 ${!isFinished ? 'bg-white' : 'bg-slate-50/30'}`}>
 
