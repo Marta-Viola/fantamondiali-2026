@@ -106,19 +106,19 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                             <button 
                                                 onClick={() => setActiveTooltip(activeTooltip === user.id ? null : user.id)}
                                                 onBlur={() => setActiveTooltip(null)}
-                                                className={`text-[11px] sm:text-sm truncate w-full text-left relative focus:outline-none cursor-pointer hover:opacity-80 transition-opacity
+                                                className={`text-[11px] sm:text-sm w-full text-left relative focus:outline-none cursor-pointer hover:opacity-80 transition-opacity
                                                 ${isMe ? 'font-black text-emerald-700' : ''}
                                                 ${isIndovino && !isMe ? 'font-black text-purple-900' : ''}
                                                 ${!isMe && !isIndovino ? 'font-bold text-slate-700' : ''}
                                             `}>
-                                                {user.username || 'Giocatore'}
+                                                <span className="block truncate">{user.username || 'Giocatore'}</span>
 
-                                                {/* Il Tooltip vero e proprio */}
+                                                {/* Il Tooltip vero e proprio (ora si apre verso il basso) */}
                                                 {activeTooltip === user.id && user.full_name && (
-                                                    <div className="absolute left-0 bottom-full mb-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                                                    <div className="absolute left-0 top-full mt-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
                                                         {user.full_name}
-                                                        {/* Triangolino in basso */}
-                                                        <div className="absolute top-full left-4 -mt-[1px] border-[5px] border-transparent border-t-slate-800"></div>
+                                                        {/* Triangolino in alto */}
+                                                        <div className="absolute bottom-full left-4 -mb-[1px] border-[5px] border-transparent border-b-slate-800"></div>
                                                     </div>
                                                 )}
                                             </button>

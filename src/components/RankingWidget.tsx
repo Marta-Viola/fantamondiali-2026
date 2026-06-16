@@ -24,6 +24,7 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                     const isMe = user.id === currentUserId
                     const rank = index + 1
                     const hasPoints = user.total_points > 0
+                    const diff = user.previous_rank ? user.previous_rank - rank : 0
 
                     let badgeColor = "bg-slate-100 text-slate-400"
 
@@ -43,18 +44,32 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                             }`}
                         >
                             <div className="flex items-center gap-3">
-                                <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black ${badgeColor}`}>
-                                    {hasPoints ? rank : '-'}
-                                </span>
+    
+                                {/* Blocco Posizione + Freccina */}
+                                <div className="flex items-center gap-1">
+                                    <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black shrink-0 ${badgeColor}`}>
+                                        {hasPoints ? rank : '-'}
+                                    </span>
+                                    
+                                    <div className="w-2 flex items-center justify-center shrink-0">
+                                        {hasPoints && diff !== 0 && (
+                                            <span className={`${diff > 0 ? 'text-emerald-500' : 'text-rose-500'} text-[8px] font-bold`}>
+                                                {diff > 0 ? '▲' : '▼'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
                                 
-
-                                <span className={`text-sm ${isMe ? 'font-black text-emerald-700' : 'font-bold text-slate-700'}`}>
+                                {/* Nickname e badge Tu */}
+                                <span className={`text-sm truncate ${isMe ? 'font-black text-emerald-700' : 'font-bold text-slate-700'}`}>
                                     {user.username || 'Giocatore'}
                                 </span>
-                                {isMe && 
-                                    <span className="text-[7px] sm:text-[9px] bg-emerald-200 text-emerald-700 px-1 w-fit rounded font-black uppercase">
+                                {isMe && (
+                                    <span className="text-[7px] sm:text-[9px] bg-emerald-200 text-emerald-700 px-1 w-fit rounded font-black uppercase shrink-0">
                                         Tu
-                                    </span>}
+                                    </span>
+                                )}
+                                
                             </div>
 
                             <div className="flex items-center gap-1">
