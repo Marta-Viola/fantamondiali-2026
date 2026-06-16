@@ -1,7 +1,14 @@
 import Link from 'next/link'
 
 export default function RankingWidget({ users, currentUserId }: { users: any[], currentUserId: string }) {
-    const topFive = users.slice(0, 5);
+    const sortedUsers = [...users].sort((a, b) => {
+        if (b.total_points !== a.total_points) return b.total_points - a.total_points
+        if (b.scores_count !== a.scores_count) return b.scores_count - a.scores_count
+        if (b.gd_count !== a.gd_count) return b.gd_count - a.gd_count
+        return (a.username || '').localeCompare(b.username || '')
+    })
+
+    const topFive = sortedUsers.slice(0, 5);
 
     return (
         <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-100">

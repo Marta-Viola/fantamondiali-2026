@@ -1,6 +1,10 @@
+'use client'
+
+import { useState } from 'react'
 interface UserProfile {
     id: string;
     username: string;
+    full_name?: string | null;
     total_points: number;
     outcomes_count: number; // esiti (da 3pt in su)
     gd_count: number;       // scarti (5pt)
@@ -10,6 +14,8 @@ interface UserProfile {
 
 export default function RankingTable({ users, currentUserId }: { users: UserProfile[], currentUserId: string }) {
     
+    const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
+
     // logica indovino
     const maxScoresCountOutsidePodium = users.reduce((max, user, index) => {
         if (index > 2 && user.scores_count > max) {
@@ -25,7 +31,7 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                 <table className="w-full text-left border-collapse table-fixed">
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th className="py-3 px-1 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-8 sm:w-16">
+                            <th className="py-3 px-1 sm:px-4 text-[9px] sm:text-[10px] font-black uppercase text-slate-400 text-center w-10 sm:w-16">
                                 <span className="hidden sm:inline">Pos.</span>
                                 <span className="sm:hidden">#</span>
                             </th>
@@ -94,14 +100,28 @@ export default function RankingTable({ users, currentUserId }: { users: UserProf
                                     
                                     {/* Colonna Nickname */}
                                     <td className="py-3 px-2 sm:px-4 align-middle">
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0 h-full">
-                                            <span className={`text-[11px] sm:text-sm truncate w-full
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0 h-full relative">
+                                            
+                                            {/* Pulsante cliccabile per il tooltip */}
+                                            <button 
+                                                onClick={() => setActiveTooltip(activeTooltip === user.id ? null : user.id)}
+                                                onBlur={() => setActiveTooltip(null)}
+                                                className={`text-[11px] sm:text-sm truncate w-full text-left relative focus:outline-none cursor-pointer hover:opacity-80 transition-opacity
                                                 ${isMe ? 'font-black text-emerald-700' : ''}
                                                 ${isIndovino && !isMe ? 'font-black text-purple-900' : ''}
                                                 ${!isMe && !isIndovino ? 'font-bold text-slate-700' : ''}
                                             `}>
                                                 {user.username || 'Giocatore'}
-                                            </span>
+
+                                                {/* Il Tooltip vero e proprio */}
+                                                {activeTooltip === user.id && user.full_name && (
+                                                    <div className="absolute left-0 bottom-full mb-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                                                        {user.full_name}
+                                                        {/* Triangolino in basso */}
+                                                        <div className="absolute top-full left-4 -mt-[1px] border-[5px] border-transparent border-t-slate-800"></div>
+                                                    </div>
+                                                )}
+                                            </button>
 
                                             {/* Tag "TU" */}
                                             {isMe && (
