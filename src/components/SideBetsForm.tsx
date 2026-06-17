@@ -95,28 +95,35 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                             : 'py-4 px-10 text-xs sm:text-sm'
                         }`}
                 >
-                    <div className="flex items-center gap-1.5 sm:gap-3 justify-center min-w-0 w-full px-1 sm:px-0">
+                    <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 min-w-0 w-full px-1 sm:px-0">
                         {selectedTeam ? (
                             <>
                                 <img 
                                     src={selectedTeam.flag} 
                                     alt="flag" 
-                                    className={`object-cover rounded-[2px] shrink-0 shadow-xs ${isBig ? 'w-10 h-6' : 'w-4 h-3 sm:w-6 sm:h-4'}`}
+                                    className={`object-cover rounded-[2px] shrink-0 shadow-xs ${isBig ? 'w-10 h-6' : 'w-5 h-3.5 sm:w-6 sm:h-4'}`}
                                 />
                                 
-                                {/* nome intero sempre visibile su desktop */}
-                                <span className="truncate hidden sm:block">{selectedTeam.name}</span>
-                                
-                                {/* nome su mobile abbreviato solo se forceTla è vero, altrimenti intero */}
-                                <span className="sm:hidden block uppercase tracking-tighter truncate max-w-[80%]">
-                                    {forceTla
-                                        ? (selectedTeam.tla || selectedTeam.name.substring(0, 3))
-                                        : selectedTeam.name
-                                    }
-                                </span>
+                                {/* CONTENITORE FLESSIBILE */}
+                                <div className="min-w-0 truncate text-slate-800">
+                                    
+                                    {/* NOME INTERO */}
+                                    <span className="hidden sm:inline font-bold truncate">
+                                        {selectedTeam.name}
+                                    </span>
+                                    
+                                    {/* TLA/NOME MOBILE */}
+                                    <span className="sm:hidden font-black text-xs uppercase tracking-tighter truncate">
+                                        {forceTla
+                                            ? (selectedTeam.tla || selectedTeam.name.substring(0, 3))
+                                            : selectedTeam.name
+                                        }
+                                    </span>
+                                    
+                                </div>
                             </>
                         ) : (
-                            <span className="text-slate-400 font-medium tracking-tight whitespace-nowrap">
+                            <span className="text-slate-400 font-medium tracking-tight truncate min-w-0">
                                 {isBig ? 'Scegli il Campione' : 'Seleziona...'}
                             </span>
                         )}
@@ -216,10 +223,10 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                 <h2 className="text-xl font-black uppercase tracking-tighter mb-4 text-center text-slate-800">
                     🛡️ Le quattro semifinaliste?
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {semiBets.map((bet, idx) => (
-                        <div key={bet.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs">
-                            <span className={`text-[9px] font-black uppercase mb-2 block ${isLocked ? 'text-slate-400' : 'text-emerald-600'}`}>
+                        <div key={bet.id} className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-100 shadow-xs min-w-0">
+                            <span className={`text-[9px] font-black uppercase mb-1.5 sm:mb-2 block truncate ${isLocked ? 'text-slate-400' : 'text-emerald-600'}`}>
                                 Semifinalista {idx + 1}
                             </span>
                             <TeamSelect bet={bet} forceTla={true} />
