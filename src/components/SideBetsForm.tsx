@@ -76,7 +76,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
 
         return (
             <div className="relative w-full">
-                {/* Bottone che simula la Select */}
                 <button
                     type="button"
                     disabled={isLocked}
@@ -91,21 +90,21 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                             : 'bg-slate-50 hover:bg-slate-100'
                         } 
                         ${isBig 
-                            ? 'py-5 px-10 text-lg sm:text-2xl' 
-                            : 'py-4 px-10 text-xs sm:text-sm'
+                            ? 'py-4 px-4 sm:py-5 sm:px-10 text-lg sm:text-2xl' 
+                            : 'py-3 px-2 pr-6 sm:py-4 sm:px-4 sm:pr-8 text-[10px] sm:text-sm'
                         }`}
                 >
-                    <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 min-w-0 w-full px-1 sm:px-0">
+                    <div className="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-3 min-w-0 w-full">
                         {selectedTeam ? (
                             <>
                                 <img 
                                     src={selectedTeam.flag} 
                                     alt="flag" 
-                                    className={`object-cover rounded-[2px] shrink-0 shadow-xs ${isBig ? 'w-10 h-6' : 'w-5 h-3.5 sm:w-6 sm:h-4'}`}
+                                    className={`object-cover rounded-[2px] shrink-0 shadow-xs ${isBig ? 'w-10 min-w-[40px] h-6' : 'w-5 min-w-[20px] h-3.5 sm:w-6 sm:min-w-[24px] sm:h-4'}`}
                                 />
                                 
                                 {/* CONTENITORE FLESSIBILE */}
-                                <div className="min-w-0 truncate text-slate-800">
+                                <div className="min-w-0 truncate text-slate-800 flex-1 text-left">
                                     
                                     {/* NOME INTERO */}
                                     <span className="hidden sm:inline font-bold truncate">
@@ -113,7 +112,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                                     </span>
                                     
                                     {/* TLA/NOME MOBILE */}
-                                    <span className="sm:hidden font-black text-xs uppercase tracking-tighter truncate">
+                                    <span className="sm:hidden font-black uppercase tracking-tighter truncate">
                                         {forceTla
                                             ? (selectedTeam.tla || selectedTeam.name.substring(0, 3))
                                             : selectedTeam.name
