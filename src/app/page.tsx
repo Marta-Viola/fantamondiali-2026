@@ -186,23 +186,10 @@ export default async function Home() {
 
         {/* Card Punteggio */}
         <div className="bg-white rounded-3xl p-6 shadow-xl border border-emerald-100 flex justify-between items-center transform transition-transform hover:scale-[1.01]">
+          
+          {/* Sezione Sinistra: Punti */}
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Il tuo Punteggio</p>
-              
-              {/* Badge Posizione e Freccetta */}
-              {currentRank > 0 && (
-                <div className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100 shadow-xs">
-                  <span className="text-[10px] font-black text-slate-700">#{currentRank}</span>
-                  {diff !== 0 && (
-                    <span className={`text-[9px] font-bold ${diff > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      {diff > 0 ? '▲' : '▼'}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Il tuo Punteggio</p>
             <div className="flex items-baseline gap-1">
               <p className="text-5xl font-black text-slate-800">{profile?.total_points || 0}</p>
               <p className="text-slate-400 font-bold text-sm">PT</p>
@@ -211,9 +198,31 @@ export default async function Home() {
               {profile?.username || 'Bomber'}
             </p>
           </div>
-          <div className="bg-emerald-50 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner shrink-0">
-            🏆
-          </div>
+
+          {/* Sezione Destra: Posizione (Sostituisce il Trofeo) */}
+          {currentRank > 0 && (
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 flex flex-col items-center justify-center shadow-inner shrink-0 min-w-[5.5rem]">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Rank</span>
+              
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-3xl font-black text-slate-800">{currentRank}</span>
+                <span className="text-xs font-bold text-slate-400">/{allRankings.length}</span>
+              </div>
+              
+              {/* Freccetta e numero posizioni guadagnate/perse */}
+              {diff !== 0 ? (
+                <div className={`flex items-center gap-0.5 text-[10px] font-black mt-1 ${diff > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  <span>{diff > 0 ? '▲' : '▼'}</span>
+                  <span>{Math.abs(diff)}</span>
+                </div>
+              ) : (
+                <div className="text-[10px] font-black mt-1 text-slate-300">
+                  -
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
 
         {/* Widget classifica */}
