@@ -20,16 +20,29 @@ export default async function Home() {
   if (!user) redirect('/login')
 
   // fetch dati in parallelo
-  const [profileRes, rankingRes, matchesRes, predictionRes, settingsRes] = await Promise.all([
+  const [profileRes, allRankingsRes, matchesRes, predictionRes, settingsRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('profiles').select('*').order('total_points', { ascending: false }).limit(5),
+    supabase.from('profiles')
+      .select('*')
+      .order('total_points', { ascending: false })
+      .order('scores_count', { ascending: false })
+      .order('gd_count', { ascending: false })
+      .order('username', { ascending: true }),
     supabase.from('matches').select('*').order('match_time', { ascending: true }),
     supabase.from('predictions').select('*').eq('user_id', user.id),
     supabase.from('app_settings').select('*').single()
   ])
 
   const profile = profileRes.data
-  const rankings = rankingRes.data
+  const allRankings = allRankingsRes.data || []
+
+  const rankings = allRankings.slice(0, 5)
+
+  const userIndex = allRankings.findIndex(p => p.id === user.id)
+  const currentRank = userIndex !== -1 ? userIndex + 1 : 0
+  const diff = (profile?.previous_rank && currentRank > 0 && profile.total_points > 0)
+    ? profile.previous_rank - currentRank
+    : 0
   const matches = (matchesRes.data as Match[]) || []
   const predictions = (predictionRes.data as Prediction[]) || []
   const settings = settingsRes.data
@@ -174,7 +187,22 @@ export default async function Home() {
         {/* Card Punteggio */}
         <div className="bg-white rounded-3xl p-6 shadow-xl border border-emerald-100 flex justify-between items-center transform transition-transform hover:scale-[1.01]">
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Il tuo Punteggio</p>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Il tuo Punteggio</p>
+              
+              {/* Badge Posizione e Freccetta */}
+              {currentRank > 0 && (
+                <div className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100 shadow-xs">
+                  <span className="text-[10px] font-black text-slate-700">#{currentRank}</span>
+                  {diff !== 0 && (
+                    <span className={`text-[9px] font-bold ${diff > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {diff > 0 ? '▲' : '▼'}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="flex items-baseline gap-1">
               <p className="text-5xl font-black text-slate-800">{profile?.total_points || 0}</p>
               <p className="text-slate-400 font-bold text-sm">PT</p>
@@ -183,7 +211,7 @@ export default async function Home() {
               {profile?.username || 'Bomber'}
             </p>
           </div>
-          <div className="bg-emerald-50 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
+          <div className="bg-emerald-50 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner shrink-0">
             🏆
           </div>
         </div>
