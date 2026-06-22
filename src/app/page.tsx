@@ -20,16 +20,29 @@ export default async function Home() {
   if (!user) redirect('/login')
 
   // fetch dati in parallelo
-  const [profileRes, rankingRes, matchesRes, predictionRes, settingsRes] = await Promise.all([
+  const [profileRes, allRankingsRes, matchesRes, predictionRes, settingsRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('profiles').select('*').order('total_points', { ascending: false }).limit(5),
+    supabase.from('profiles')
+      .select('*')
+      .order('total_points', { ascending: false })
+      .order('scores_count', { ascending: false })
+      .order('gd_count', { ascending: false })
+      .order('username', { ascending: true }),
     supabase.from('matches').select('*').order('match_time', { ascending: true }),
     supabase.from('predictions').select('*').eq('user_id', user.id),
     supabase.from('app_settings').select('*').single()
   ])
 
   const profile = profileRes.data
-  const rankings = rankingRes.data
+  const allRankings = allRankingsRes.data || []
+
+  const rankings = allRankings.slice(0, 5)
+
+  const userIndex = allRankings.findIndex(p => p.id === user.id)
+  const currentRank = userIndex !== -1 ? userIndex + 1 : 0
+  const diff = (profile?.previous_rank && currentRank > 0 && profile.total_points > 0)
+    ? profile.previous_rank - currentRank
+    : 0
   const matches = (matchesRes.data as Match[]) || []
   const predictions = (predictionRes.data as Prediction[]) || []
   const settings = settingsRes.data
@@ -173,8 +186,10 @@ export default async function Home() {
 
         {/* Card Punteggio */}
         <div className="bg-white rounded-3xl p-6 shadow-xl border border-emerald-100 flex justify-between items-center transform transition-transform hover:scale-[1.01]">
+          
+          {/* Sezione Sinistra: Punti */}
           <div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Il tuo Punteggio</p>
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Il tuo Punteggio</p>
             <div className="flex items-baseline gap-1">
               <p className="text-5xl font-black text-slate-800">{profile?.total_points || 0}</p>
               <p className="text-slate-400 font-bold text-sm">PT</p>
@@ -183,9 +198,31 @@ export default async function Home() {
               {profile?.username || 'Bomber'}
             </p>
           </div>
-          <div className="bg-emerald-50 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
-            🏆
-          </div>
+
+          {/* Sezione Destra: Posizione (Sostituisce il Trofeo) */}
+          {currentRank > 0 && (
+            <div className="bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 flex flex-col items-center justify-center shadow-inner shrink-0 min-w-[5.5rem]">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Rank</span>
+              
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-3xl font-black text-slate-800">{currentRank}</span>
+                <span className="text-xs font-bold text-slate-400">/{allRankings.length}</span>
+              </div>
+              
+              {/* Freccetta e numero posizioni guadagnate/perse */}
+              {diff !== 0 ? (
+                <div className={`flex items-center gap-0.5 text-[10px] font-black mt-1 ${diff > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  <span>{diff > 0 ? '▲' : '▼'}</span>
+                  <span>{Math.abs(diff)}</span>
+                </div>
+              ) : (
+                <div className="text-[10px] font-black mt-1 text-slate-300">
+                  -
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
 
         {/* Widget classifica */}
