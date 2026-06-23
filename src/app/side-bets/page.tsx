@@ -29,12 +29,12 @@ export default async function SideBetsPage() {
         settings.current_phase = 'SEDICESIMI' // Spostiamo la fase ai sedicesimi
         settings.is_approved = true           // Forza lo stato attivo
         
-        // TRUCCO INITIAL: Tutto nel futuro
-        const dopodomani = new Date(now.getTime() + 48 * 60 * 60 * 1000)
-        const domani = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+        // TRUCCO CLOSED: Tutto nel passato
+        const ieri = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+        const lAltroIeri = new Date(now.getTime() - 48 * 60 * 60 * 1000)
         
-        settings.voting_open_at = domani.toISOString() // Apre domani
-        settings.voting_closed_at = dopodomani.toISOString() // Chiude dopodomani
+        settings.voting_open_at = lAltroIeri.toISOString() // Aperto 2 giorni fa
+        settings.voting_closed_at = ieri.toISOString() // Chiuso ieri
     }
 
     // calcolo dei flag temporali
