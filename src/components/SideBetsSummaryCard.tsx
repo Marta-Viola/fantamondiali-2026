@@ -80,16 +80,21 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
 
     // Componente interno per renderizzare una "Riga" della card
     const SummaryRow = ({ title, maxPt, currentPt = 0, children }: any) => (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-slate-100/50 last:border-0">
-            <div className="flex justify-between items-center w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 py-3 border-b border-slate-100/50 last:border-0">
+            {/* Titolo fisso a sinistra */}
+            <div className="flex justify-between items-center w-full sm:w-auto shrink-0">
                 <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{title}</span>
                 <span className="sm:hidden text-[10px] font-black text-slate-300 bg-slate-50 px-2 py-0.5 rounded-full">
                     <span className={currentPt > 0 ? 'text-emerald-500' : ''}>{currentPt}</span> / {maxPt} PT
                 </span>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            
+            {/* Contenitore flessibile: su mobile a sinistra, su desktop spinge a DESTRA (sm:justify-end) */}
+            <div className="flex items-center gap-2 flex-wrap flex-1 sm:justify-end">
                 {children}
             </div>
+
+            {/* Punti fissi a destra su desktop */}
             <div className="hidden sm:block text-[10px] font-black text-slate-300 bg-slate-50 px-2 py-0.5 rounded-full shrink-0">
                 <span className={currentPt > 0 ? 'text-emerald-500' : ''}>{currentPt}</span> / {maxPt} PT
             </div>
