@@ -50,12 +50,24 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
     const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
     const [numericAnswers, setNumericAnswers] = useState<Record<string, number | ''>>(formattedNumericData)
 
-    // identifichiamo gli ID per l'automazione (basandoci sulle label)
-    const winnerBet = bets.find((b) => b.label.startsWith('Vincitore'))
-    const finalScoreBet = bets.find((b) => b.type === 'score')
-    const finalistBets = bets.filter((b) => b.label.startsWith('Finalista'))
-    const semiBets = bets.filter((b: any) => b.label.startsWith('Semifinalista'))
-    const topScorerBet = bets.find((b) => b.label.startsWith('Capocannoniere'))
+    // 🛠️ FIX: IDENTIFICAZIONE ROBUSTA DELLE SCOMMESSE
+    // Usiamo toLowerCase() e includes() per evitare problemi di maiuscole o testi leggermente diversi
+    const winnerBet = bets.find((b) => b.label.toLowerCase().includes('vincit'))
+    
+    const finalScoreBet = bets.find((b) => b.type === 'score' || b.label.toLowerCase().includes('risultato'))
+    
+    // Troviamo le finaliste assicurandoci di escludere la parola "semi", e ne prendiamo massimo 2
+    const finalistBets = bets.filter((b) => 
+        b.label.toLowerCase().includes('finalista') && 
+        !b.label.toLowerCase().includes('semi')
+    ).slice(0, 2)
+    
+    // Troviamo le semifinaliste e ne prendiamo massimo 4 (evita bug da doppioni nel DB)
+    const semiBets = bets.filter((b: any) => 
+        b.label.toLowerCase().includes('semifinalista')
+    ).slice(0, 4)
+    
+    const topScorerBet = bets.find((b) => b.label.toLowerCase().includes('capocannoniere'))
 
     const handleTeamChange = (betId: string, teamName: string) => {
         if (isLocked) return
@@ -103,22 +115,16 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                                     className={`object-cover rounded-[2px] shrink-0 shadow-xs ${isBig ? 'w-10 min-w-[40px] h-6' : 'w-5 min-w-[20px] h-3.5 sm:w-6 sm:min-w-[24px] sm:h-4'}`}
                                 />
                                 
-                                {/* CONTENITORE FLESSIBILE */}
                                 <div className="min-w-0 truncate text-slate-800 flex-1 text-left">
-                                    
-                                    {/* NOME INTERO */}
                                     <span className="hidden sm:inline font-bold truncate">
                                         {selectedTeam.name}
                                     </span>
-                                    
-                                    {/* TLA/NOME MOBILE */}
                                     <span className="sm:hidden font-black uppercase tracking-tighter truncate">
                                         {forceTla
                                             ? (selectedTeam.tla || selectedTeam.name.substring(0, 3))
                                             : selectedTeam.name
                                         }
                                     </span>
-                                    
                                 </div>
                             </>
                         ) : (
@@ -128,7 +134,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                         )}
                     </div>
 
-                    {/* Freccetta */}
                     {!isLocked && (
                         <div className={`absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 items-center pointer-events-none ${!isBig ? 'hidden sm:flex' : 'flex'}`}>
                             <svg className={`w-3 h-3 sm:w-5 sm:h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,17 +141,13 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                             </svg>
                         </div>
                     )}
-                    
                 </button>
 
-                {/* lista a tendina personalizzata con bandiere */}
                 {isOpen && !isLocked && (
                     <>
-                        {/* Overlay per chiudere il menu cliccando fuori */}
                         <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)}></div>
 
                         <div className="absolute z-30 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 overflow-hidden">
-                            {/* campo di ricerca */}
                             <div className="p-2 border-b border-slate-50 bg-slate-50/50">
                                 <input
                                     autoFocus
@@ -158,7 +159,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                                 />
                             </div>
 
-                            {/* lista filtrata */}
                             <div className="max-h-60 overflow-y-auto custom-scrollbar">
                                 {filteredTeams.length > 0 ? (
                                     filteredTeams.map((t: any) => (
@@ -217,7 +217,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
             onSubmit={handleConfirmClick}
             className="w-full max-w-2xl mx-auto px-4 mt-4 space-y-12 pb-24"
         >
-            {/*  SEZIONE SEMIFINALI */}
+            {/* SEZIONE SEMIFINALI */}
             <section className="relative z-30">
                 <h2 className="text-xl font-black uppercase tracking-tighter mb-4 text-center text-slate-800">
                     🛡️ Le quattro semifinaliste?
@@ -253,7 +253,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                     </div>
                 </div>
 
-                {/* risultato esatto */}
                 {finalScoreBet && (
                     <div className={`p-6 bg-white rounded-3xl border border-slate-100 shadow-xs text-center transition-all ${isLocked ? 'bg-slate-50' : ''}`}>
                         <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${isLocked ? 'text-slate-400' : 'text-emerald-600'}`}>
@@ -261,7 +260,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                         </p>
 
                         <div className="flex items-center justify-center gap-4">
-                            {/* input casa */}
                             <input
                                 type="number"
                                 inputMode="numeric"
@@ -283,7 +281,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
 
                             <span className={`text-2xl font-black ${isLocked ? 'text-slate-300' : 'text-emerald-400'}`}>-</span>
 
-                            {/* input ospite */}
                             <input
                                 type="number"
                                 inputMode="numeric"
@@ -322,7 +319,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                     >
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl pointer-events-none">✨</div>
 
-                        {/* campo vincitore */}
                         <div>
                             <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${isLocked ? 'text-slate-400' : 'text-amber-600'}`}>
                                 Chi alzerà la coppa?
@@ -343,7 +339,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                         <div className="absolute -bottom-4 -right-4 text-6xl opacity-10 grayscale pointer-events-none">⚽</div>
 
                         <div className="flex flex-col sm:flex-row gap-4 relative z-10">
-                            {/* input nome giocatore */}
                             <input
                                 type="text"
                                 disabled={isLocked}
@@ -360,7 +355,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                                 }}
                             />
 
-                            {/* input numero reti */}
                             <div className="flex items-center justify-center sm:justify-start gap-3">
                                 <label className={`text-xs font-black uppercase tracking-widest ${isLocked ? 'text-slate-400' : 'text-white/70'}`}>
                                     Reti:
@@ -391,7 +385,6 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
 
             {/* TASTO SALVA */}
             {isLocked ? (
-                // se è bloccato un banner pulito anziché il pulsante attivo
                 <div className="w-full text-center py-4 bg-slate-100 rounded-2xl border border-dashed border-slate-200 text-xs font-black uppercase text-slate-400 flex items-center justify-center gap-2 tracking-wider">
                     🔒 Modifiche non consentite
                 </div>
@@ -415,7 +408,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                     emoji="⭐"
                     title="Confermi le scelte?"
                     description={
-                        <>I tuoi pronostici speciali verranno registrati. Potrai modificarli liberamente fino al fischio d'inizio ufficiale della fase a gironi.</>
+                        <>I tuoi pronostici speciali verranno registrati. Potrai modificarli liberamente finché il mercato resterà aperto.</>
                     }
                 />
             )}
