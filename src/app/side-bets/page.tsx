@@ -6,6 +6,7 @@ import StandardHeader from '@/components/ui/StandardHeader'
 import SideBetsForm from '@/components/SideBetsForm'
 import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
 import Countdown from '@/components/ui/Countdown'
+import SideBetsSummaryCard from '@/components/SideBetsSummaryCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -221,6 +222,23 @@ export default async function SideBetsPage() {
                 )}
 
                 {/* QUI ANDRà LA CARD DI RIEPILOGO */}
+                {/* RIEPILOGO ROUND 1 (Sempre visibile se ci sono risposte) */}
+                <SideBetsSummaryCard 
+                    round={1} 
+                    bets={round1Bets} 
+                    answers={round1Answers} 
+                    teams={teams} 
+                />
+
+                {/* RIEPILOGO ROUND 2 (Visibile solo dal Round 2 in poi) */}
+                {(isRound2 || (!isRound1 && !isRound2)) && (
+                    <SideBetsSummaryCard 
+                        round={2} 
+                        bets={round2Bets} 
+                        answers={round2Answers} 
+                        teams={teams} 
+                    />
+                )}
 
                 {/* BLOCCO FORM DELLE SIDE BETS ATTIVE */}
                 {!isBlocked && activeBets && activeBets.length > 0 ? (
