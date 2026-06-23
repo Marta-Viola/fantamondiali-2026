@@ -31,17 +31,21 @@ interface SideBetsSummaryCardProps {
 }
 
 export default function SideBetsSummaryCard({ round, bets, answers, teams }: SideBetsSummaryCardProps) {
-    // Funzione helper per trovare le risposte in base a una parola chiave nella label della scommessa
-    const getAnswersByKeyword = (keyword: string) => {
-        const matchingBets = bets.filter(b => b.label.toLowerCase().includes(keyword.toLowerCase()));
+    // Funzione helper aggiornata per escludere parole indesiderate (es: prendi "finalista" ma NON "semifinalista")
+    const getAnswersByKeyword = (keyword: string, excludeKeyword?: string) => {
+        const matchingBets = bets.filter(b => {
+            const matchesKeyword = b.label.toLowerCase().includes(keyword.toLowerCase());
+            const doesNotMatchExclude = !excludeKeyword || !b.label.toLowerCase().includes(excludeKeyword.toLowerCase());
+            return matchesKeyword && doesNotMatchExclude;
+        });
         const matchingBetIds = matchingBets.map(b => b.id);
         return answers.filter(a => matchingBetIds.includes(a.side_bet_id));
     }
 
-    // Estraiamo i gruppi logici
+    // Estraiamo i gruppi logici usando le keyword "a prova di bomba"
     const semiAnswers = getAnswersByKeyword('semifinal');
-    const finalAnswers = getAnswersByKeyword('finalist');
-    const winnerAnswer = getAnswersByKeyword('vincitrice')[0]; // Prende la prima
+    const finalAnswers = getAnswersByKeyword('finalist', 'semi'); // Prende i finalisti, ma salta i semifinalisti
+    const winnerAnswer = getAnswersByKeyword('vincit')[0]; // Prende "vincitore" o "vincitrice"
     const resultAnswer = getAnswersByKeyword('risultato')[0];
     const scorerAnswer = getAnswersByKeyword('capocannoniere')[0];
 
