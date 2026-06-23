@@ -243,10 +243,10 @@ export default async function SideBetsPage() {
                 {/* BLOCCO FORM DELLE SIDE BETS ATTIVE */}
                 {!isBlocked && activeBets && activeBets.length > 0 ? (
                     <SideBetsForm
-                        key={`${settings.current_phase}-${existingAnswers?.length || 0}`} 
+                        key={`${settings.current_phase}-${activeAnswers?.length || 0}`} 
                         bets={activeBets} 
                         teams={teams}
-                        initialAnswers={existingAnswers || []}
+                        initialAnswers={activeAnswers || []}
                         isLocked={!config.allowVoting}
                     />
                 ) : (

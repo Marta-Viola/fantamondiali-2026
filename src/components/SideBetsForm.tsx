@@ -50,12 +50,24 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
     const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
     const [numericAnswers, setNumericAnswers] = useState<Record<string, number | ''>>(formattedNumericData)
 
-    // identifichiamo gli ID per l'automazione (basandoci sulle label)
-    const winnerBet = bets.find((b) => b.label.startsWith('Vincitore'))
-    const finalScoreBet = bets.find((b) => b.type === 'score')
-    const finalistBets = bets.filter((b) => b.label.startsWith('Finalista'))
-    const semiBets = bets.filter((b: any) => b.label.startsWith('Semifinalista'))
-    const topScorerBet = bets.find((b) => b.label.startsWith('Capocannoniere'))
+    // 🛠️ FIX: IDENTIFICAZIONE ROBUSTA DELLE SCOMMESSE
+    // Usiamo toLowerCase() e includes() per evitare problemi di maiuscole o testi leggermente diversi
+    const winnerBet = bets.find((b) => b.label.toLowerCase().includes('vincit'))
+    
+    const finalScoreBet = bets.find((b) => b.type === 'score' || b.label.toLowerCase().includes('risultato'))
+    
+    // Troviamo le finaliste assicurandoci di escludere la parola "semi", e ne prendiamo massimo 2
+    const finalistBets = bets.filter((b) => 
+        b.label.toLowerCase().includes('finalista') && 
+        !b.label.toLowerCase().includes('semi')
+    ).slice(0, 2)
+    
+    // Troviamo le semifinaliste e ne prendiamo massimo 4 (evita bug da doppioni nel DB)
+    const semiBets = bets.filter((b: any) => 
+        b.label.toLowerCase().includes('semifinalista')
+    ).slice(0, 4)
+    
+    const topScorerBet = bets.find((b) => b.label.toLowerCase().includes('capocannoniere'))
 
     const handleTeamChange = (betId: string, teamName: string) => {
         if (isLocked) return
@@ -64,7 +76,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
             [betId]: teamName
         }))
     }
-
+    
     const TeamSelect = ({ bet, isBig = false, forceTla = false }: { bet: any, isBig?: boolean, forceTla?: boolean }) => {
         const [isOpen, setIsOpen] = useState(false)
         const [searchTerm, setSearchTerm] = useState("")
