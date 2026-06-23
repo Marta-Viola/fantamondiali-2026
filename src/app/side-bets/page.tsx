@@ -14,6 +14,9 @@ export default async function SideBetsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
+
+    const now = new Date()
+
     // impostazioni globali
     const { data: settings } = await supabase
         .from('app_settings')
@@ -22,12 +25,21 @@ export default async function SideBetsPage() {
 
     // 🛑 TRUCCO PER TESTARE LA UI (DA CANCELLARE PRIMA DELLA PRODUZIONE)
     if (settings) {
-        settings.current_phase = 'SEDICESIMI'
-        settings.is_approved = true
+        settings.current_phase = 'SEDICESIMI' // Spostiamo la fase ai sedicesimi
+        settings.is_approved = true           // Forza lo stato attivo
+        
+        // Trucchiamo le date per far risultare il mercato APERTO oggi
+        const ieri = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+        const domani = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+
+        // se vogliamo vedere INITIAL: metti ieri e domani nel futuro
+        // se vogliamo vedere CHIUSO: metti ieri e domani nel passato
+        
+        settings.voting_open_at = ieri.toISOString()
+        settings.voting_closed_at = domani.toISOString()
     }
 
     // calcolo dei flag temporali
-    const now = new Date()
     const openAt = settings ? new Date(settings.voting_open_at) : new Date()
     const closedAt = settings ? new Date(settings.voting_closed_at) : new Date()
     
