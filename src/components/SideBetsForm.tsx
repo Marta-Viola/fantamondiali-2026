@@ -76,7 +76,7 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
             [betId]: teamName
         }))
     }
-
+    
     const TeamSelect = ({ bet, isBig = false, forceTla = false }: { bet: any, isBig?: boolean, forceTla?: boolean }) => {
         const [isOpen, setIsOpen] = useState(false)
         const [searchTerm, setSearchTerm] = useState("")
