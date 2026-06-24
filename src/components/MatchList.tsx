@@ -44,10 +44,17 @@ const STAGE_ORDER = [
 export default function MatchList({ matches, predictions }: { matches: Match[], predictions: Prediction[] }) {
 
     const [openStages, setOpenStages] = useState<Record<string, boolean>>(() => {
+        // Cerca l'ultima fase che contiene match validi (escludendo i TBD)
         const latestPopulatedStage = [...STAGE_ORDER].reverse().find(stage => 
-            matches.some(m => m.stage === stage || (stage === 'FINAL' && m.stage === 'THIRD_PLACE'))
+            matches.some(m => 
+                (m.stage === stage || (stage === 'FINAL' && m.stage === 'THIRD_PLACE')) &&
+                m.home_team !== 'TBD' && 
+                m.away_team !== 'TBD'
+            )
         )
-        return latestPopulatedStage ? { [latestPopulatedStage]: true } : {}
+        
+        // Se trova una fase con squadre reali, la apre. Altrimenti fallback sui Gironi.
+        return latestPopulatedStage ? { [latestPopulatedStage]: true } : { 'GROUP_STAGE': true }
     })
 
     const toggleStage = (stage: string) => {

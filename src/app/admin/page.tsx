@@ -59,17 +59,6 @@ export default async function AdminPage() {
 
                 {/* controllo fasi */}
                 <AdminControlCenter currentSettings={settings} />
-
-                {/* navigazione */}
-                {/* <div className="pt-4">
-                    <Link
-                        href="/"
-                        className="flex items-center justify-center gap-2 text-slate-500 hover:text-white transition-colors font-bold text-xs uppercase tracking-widest"
-                    >
-                        ⬅️ Esci dalla Regia e torna in campo
-                    </Link>
-                </div> */}
-                
             </div>
         </main>
     )
