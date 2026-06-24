@@ -23,13 +23,13 @@ export async function saveSideBets(
 
     const now = new Date()
 
-    // 🛑 TRUCCO LATO SERVER PER TESTARE IL SALVATAGGIO (DA CANCELLARE PRIMA DEL MERGE)
-    settings.is_approved = true
-    const ieri = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-    const domani = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-    settings.voting_open_at = ieri.toISOString()
-    settings.voting_closed_at = domani.toISOString()
-    // 🛑 FINE TRUCCO LATO SERVER
+    // // 🛑 TRUCCO LATO SERVER PER TESTARE IL SALVATAGGIO (DA CANCELLARE PRIMA DEL MERGE)
+    // settings.is_approved = true
+    // const ieri = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    // const domani = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+    // settings.voting_open_at = ieri.toISOString()
+    // settings.voting_closed_at = domani.toISOString()
+    // // 🛑 FINE TRUCCO LATO SERVER
 
     const openAt = new Date(settings.voting_open_at)
     const closedAt = new Date(settings.voting_closed_at)

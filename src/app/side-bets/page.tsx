@@ -24,21 +24,21 @@ export default async function SideBetsPage() {
         .select('*')
         .single()
 
-   // 🛑 TRUCCO PER TESTARE LA UI (DA CANCELLARE PRIMA DELLA PRODUZIONE)
-    if (settings) {
-        settings.current_phase = 'SEDICESIMI' // Spostiamo la fase ai sedicesimi
-        settings.is_approved = true           // Forza lo stato attivo
+//    // 🛑 TRUCCO PER TESTARE LA UI (DA CANCELLARE PRIMA DELLA PRODUZIONE)
+//     if (settings) {
+//         settings.current_phase = 'SEDICESIMI' // Spostiamo la fase ai sedicesimi
+//         settings.is_approved = true           // Forza lo stato attivo
 
-        // Trucchiamo le date per far risultare il mercato APERTO oggi
-        const ieri = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-        const domani = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+//         // Trucchiamo le date per far risultare il mercato APERTO oggi
+//         const ieri = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+//         const domani = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
-        // se vogliamo vedere INITIAL: metti ieri e domani nel futuro
-        // se vogliamo vedere CHIUSO: metti ieri e domani nel passato
+//         // se vogliamo vedere INITIAL: metti ieri e domani nel futuro
+//         // se vogliamo vedere CHIUSO: metti ieri e domani nel passato
 
-        settings.voting_open_at = ieri.toISOString()
-        settings.voting_closed_at = domani.toISOString()
-    } 
+//         settings.voting_open_at = ieri.toISOString()
+//         settings.voting_closed_at = domani.toISOString()
+//     } 
 
     // calcolo dei flag temporali
     const openAt = settings ? new Date(settings.voting_open_at) : new Date()
