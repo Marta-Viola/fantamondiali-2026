@@ -98,20 +98,52 @@ export async function updateSystemStatus(
     return { success: true }
 }
 
+export async function fetchSideBetsTruth() {
+    const supabase = await createClient()
+    
+    // Peschiamo solo le scommesse a cui la regia ha assegnato un risultato
+    const { data, error } = await supabase
+        .from('side_bets')
+        .select('label, result, numeric_result, round')
+        .not('result', 'is', null)
+        .order('round', { ascending: true })
+
+    if (error) {
+        console.error("Errore fetch verità:", error.message)
+        return { success: false, error: error.message }
+    }
+
+    return { success: true, data }
+}
+
 export async function triggerSideBetsCalculation() {
+    const supabase = await createClient()
+    
     try {
-        // ... qui prossimamente le VERE query a supabase
+        // 1. IL LANCIO DEL MISSILE: Chiamiamo la mega-funzione SQL!
+        const { error: rpcError } = await supabase.rpc('calculate_side_bets_points')
+        
+        if (rpcError) throw new Error(rpcError.message)
 
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        // 2. IL REPORT: Andiamo a leggere i punti appena assegnati (solo chi ha fatto punti)
+        const { data: logs, error: logsError } = await supabase
+            .from('profiles')
+            .select('username, side_bets_points')
+            .gt('side_bets_points', 0) // Prendiamo solo chi ha > 0
+            .order('side_bets_points', { ascending: false })
 
-        const fakeLogs = [
-            { username: 'francesca', points: 0 },
-            { username: 'marco_99', points: 0 },
-            { username: 'luca_bomber', points: 0 },
-            { username: 'utente_misterioso', points: 0 }
-        ]
+        if (logsError) throw new Error(logsError.message)
 
-        return { success: true, data: fakeLogs }
+        const formattedLogs = logs.map(l => ({
+            username: l.username,
+            points: l.side_bets_points
+        }))
+
+        // Riavviamo la cache della classifica
+        revalidatePath('/')
+        revalidatePath('/classifica')
+        
+        return { success: true, data: formattedLogs }
 
     } catch (error: any) {
         console.error("ERRORE CALCOLO SIDE BETS:", error.message)
