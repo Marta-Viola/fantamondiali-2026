@@ -33,6 +33,21 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
     const [loading, setLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
+    // 🛠️ FIX: IDENTIFICAZIONE ROBUSTA DELLE SCOMMESSE
+    const winnerBet = bets.find((b) => b.label.toLowerCase().includes('vincit'))
+    const finalScoreBet = bets.find((b) => b.type === 'score' || b.label.toLowerCase().includes('risultato'))
+    
+    const finalistBets = bets.filter((b) => 
+        b.label.toLowerCase().includes('finalista') && 
+        !b.label.toLowerCase().includes('semi')
+    ).slice(0, 2)
+    
+    const semiBets = bets.filter((b: any) => 
+        b.label.toLowerCase().includes('semifinalista')
+    ).slice(0, 4)
+    
+    const topScorerBet = bets.find((b) => b.label.toLowerCase().includes('capocannoniere'))
+
     // trasformazione dati
     const formattedInitialData = initialAnswers.reduce((acc, curr) => {
         acc[curr.side_bet_id] = curr.answer || ''
@@ -46,28 +61,16 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
         return acc
     }, {} as Record<string, number | ''>)
     
-    // stato inizializzato
-    const [answers, setAnswers] = useState<Record<string, string>>(formattedInitialData)
+    // 🛠️ FIX STATO INIZIALE: Iniettiamo fisicamente lo "0-0" se è un form nuovo!
+    const [answers, setAnswers] = useState<Record<string, string>>(() => {
+        const init = { ...formattedInitialData }
+        if (finalScoreBet && !init[finalScoreBet.id]) {
+            init[finalScoreBet.id] = "0-0"
+        }
+        return init
+    })
+    
     const [numericAnswers, setNumericAnswers] = useState<Record<string, number | ''>>(formattedNumericData)
-
-    // 🛠️ FIX: IDENTIFICAZIONE ROBUSTA DELLE SCOMMESSE
-    // Usiamo toLowerCase() e includes() per evitare problemi di maiuscole o testi leggermente diversi
-    const winnerBet = bets.find((b) => b.label.toLowerCase().includes('vincit'))
-    
-    const finalScoreBet = bets.find((b) => b.type === 'score' || b.label.toLowerCase().includes('risultato'))
-    
-    // Troviamo le finaliste assicurandoci di escludere la parola "semi", e ne prendiamo massimo 2
-    const finalistBets = bets.filter((b) => 
-        b.label.toLowerCase().includes('finalista') && 
-        !b.label.toLowerCase().includes('semi')
-    ).slice(0, 2)
-    
-    // Troviamo le semifinaliste e ne prendiamo massimo 4 (evita bug da doppioni nel DB)
-    const semiBets = bets.filter((b: any) => 
-        b.label.toLowerCase().includes('semifinalista')
-    ).slice(0, 4)
-    
-    const topScorerBet = bets.find((b) => b.label.toLowerCase().includes('capocannoniere'))
 
     const handleTeamChange = (betId: string, teamName: string) => {
         if (isLocked) return
@@ -270,7 +273,8 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                                     if (isLocked) return
                                     const val = e.target.value.replace(/\D/g, "") || "0"
                                     const current = (answers[finalScoreBet.id] || "0-0").split("-")
-                                    setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${val}-${current[1]}` }))
+                                    // 🛠️ FIX: Protezione contro undefined se salta un campo
+                                    setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${val}-${current[1] || "0"}` }))
                                 }}
                                 className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
                                     ${isLocked 
@@ -291,7 +295,8 @@ export default function SideBetsForm({ bets, teams, initialAnswers, isLocked = f
                                     if (isLocked) return
                                     const val = e.target.value.replace(/\D/g, "") || "0"
                                     const current = (answers[finalScoreBet.id] || "0-0").split("-")
-                                    setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${current[0]}-${val}` }))
+                                    // 🛠️ FIX: Protezione contro undefined
+                                    setAnswers(prev => ({ ...prev, [finalScoreBet.id]: `${current[0] || "0"}-${val}` }))
                                 }}
                                 className={`w-16 h-14 text-center font-black text-2xl rounded-2xl border-2 outline-none transition-all p-0 shadow-inner
                                     ${isLocked 
