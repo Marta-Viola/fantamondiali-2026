@@ -1,6 +1,12 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function RankingWidget({ users, currentUserId }: { users: any[], currentUserId: string }) {
+    // Stato per gestire quale tooltip è aperto
+    const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
+
     const sortedUsers = [...users].sort((a, b) => {
         if (b.total_points !== a.total_points) return b.total_points - a.total_points
         if (b.scores_count !== a.scores_count) return b.scores_count - a.scores_count
@@ -9,6 +15,9 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
     })
 
     const topFive = sortedUsers.slice(0, 5);
+
+    // Calcoliamo il punteggio massimo per capire chi è l'Indovino
+    const maxScoresCount = Math.max(...users.map(u => u.scores_count || 0))
 
     return (
         <div className="bg-white rounded-[2rem] p-6 shadow-lg border border-emerald-100">
@@ -25,13 +34,25 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                     const rank = index + 1
                     const hasPoints = user.total_points > 0
                     const diff = user.previous_rank ? user.previous_rank - rank : 0
+                    
+                    // Condizione Indovino
+                    const isIndovino = hasPoints && user.scores_count === maxScoresCount && maxScoresCount > 0
 
+                    // Gestione Colore Badge
                     let badgeColor = "bg-slate-100 text-slate-400"
-
                     if (hasPoints) {
                         if (index === 0) badgeColor = "bg-amber-400 text-white"
                         if (index === 1) badgeColor = "bg-slate-300 text-slate-600"
                         if (index === 2) badgeColor = "bg-orange-500 text-white"
+                    }
+                    if (isIndovino) {
+                        badgeColor = "bg-purple-600 text-white shadow-md shadow-purple-200"
+                    }
+
+                    // Gestione Colore Nome
+                    let nameColor = isMe ? 'text-emerald-700' : 'text-slate-700'
+                    if (isIndovino) {
+                        nameColor = 'text-purple-700' // Colora di viola se è l'indovino
                     }
 
                     return (
@@ -44,7 +65,6 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                             }`}
                         >
                             <div className="flex items-center gap-3">
-    
                                 {/* Blocco Posizione + Freccina */}
                                 <div className="flex items-center gap-1">
                                     <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black shrink-0 ${badgeColor}`}>
@@ -60,16 +80,32 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                                     </div>
                                 </div>
                                 
-                                {/* Nickname e badge Tu */}
-                                <span className={`text-sm truncate ${isMe ? 'font-black text-emerald-700' : 'font-bold text-slate-700'}`}>
-                                    {user.username || 'Giocatore'}
-                                </span>
-                                {isMe && (
-                                    <span className="text-[7px] sm:text-[9px] bg-emerald-200 text-emerald-700 px-1 w-fit rounded font-black uppercase shrink-0">
-                                        Tu
+                                {/* Nickname, Badge Tu e Tooltip */}
+                                <div 
+                                    className="relative flex items-center gap-2 cursor-help"
+                                    onMouseEnter={() => setActiveTooltip(user.id)}
+                                    onMouseLeave={() => setActiveTooltip(null)}
+                                    onClick={() => setActiveTooltip(activeTooltip === user.id ? null : user.id)} // Utile per mobile
+                                >
+                                    <span className={`text-sm truncate font-black transition-colors ${nameColor}`}>
+                                        {user.username || 'Giocatore'}
                                     </span>
-                                )}
-                                
+
+                                    {isMe && (
+                                        <span className="text-[7px] sm:text-[9px] bg-emerald-200 text-emerald-700 px-1 w-fit rounded font-black uppercase shrink-0">
+                                            Tu
+                                        </span>
+                                    )}
+
+                                    {/* Il Tooltip vero e proprio */}
+                                    {activeTooltip === user.id && user.full_name && (
+                                        <div className="absolute left-0 top-full mt-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                                            {user.full_name}
+                                            {/* Triangolino in alto */}
+                                            <div className="absolute bottom-full left-4 -mb-[1px] border-[5px] border-transparent border-b-slate-800"></div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex items-center gap-1">
