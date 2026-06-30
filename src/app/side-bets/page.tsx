@@ -6,6 +6,7 @@ import StandardHeader from '@/components/ui/StandardHeader'
 import SideBetsForm from '@/components/SideBetsForm'
 import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
 import Countdown from '@/components/ui/Countdown'
+import SideBetsSummaryCard from '@/components/SideBetsSummaryCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,14 +15,32 @@ export default async function SideBetsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
+
+    const now = new Date()
+
     // impostazioni globali
     const { data: settings } = await supabase
         .from('app_settings')
         .select('*')
         .single()
 
+//    // 🛑 TRUCCO PER TESTARE LA UI (DA CANCELLARE PRIMA DELLA PRODUZIONE)
+//     if (settings) {
+//         settings.current_phase = 'SEDICESIMI' // Spostiamo la fase ai sedicesimi
+//         settings.is_approved = true           // Forza lo stato attivo
+
+//         // Trucchiamo le date per far risultare il mercato APERTO oggi
+//         const ieri = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+//         const domani = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+
+//         // se vogliamo vedere INITIAL: metti ieri e domani nel futuro
+//         // se vogliamo vedere CHIUSO: metti ieri e domani nel passato
+
+//         settings.voting_open_at = ieri.toISOString()
+//         settings.voting_closed_at = domani.toISOString()
+//     } 
+
     // calcolo dei flag temporali
-    const now = new Date()
     const openAt = settings ? new Date(settings.voting_open_at) : new Date()
     const closedAt = settings ? new Date(settings.voting_closed_at) : new Date()
     
@@ -30,6 +49,10 @@ export default async function SideBetsPage() {
     const isInitial = settings.is_approved && now < openAt
     const isOpen = settings.is_approved && now >= openAt && now <= closedAt
     const isClosed = settings.is_approved && now > closedAt
+
+    // riconoscere i round in base alla fase
+    const isRound1 = settings?.current_phase === 'GIRONI'
+    const isRound2 = settings?.current_phase === 'SEDICESIMI'
 
     // configurazione dinamica dell'interfaccia
     let config = {
@@ -52,9 +75,9 @@ export default async function SideBetsPage() {
             allowVoting: false,
             statusLabel: "Manutenzione"
         }
-    } else if (settings?.current_phase === 'GIRONI') {
+    } else if (isRound1) {
+        // LOGICA ROUND 1 (GIRONI)
         if (isInitial) {
-            // STATO GIALLO (INITIAL)
             config = {
                 title: "Scommesse Speciali in Arrivo ⏳",
                 subtitle: "Prepara le tue scommesse speciali sul torneo!",
@@ -65,7 +88,6 @@ export default async function SideBetsPage() {
                 statusLabel: "Conto alla rovescia"
             }
         } else if (isOpen) {
-            // STATO VERDE (OPEN)
             config = {
                 title: "Scommesse Speciali ⭐",
                 subtitle: "Inserisci i tuoi pronostici speciali prima del fischio d'inizio!",
@@ -76,7 +98,6 @@ export default async function SideBetsPage() {
                 statusLabel: "Mercato Aperto"
             }
         } else if (isClosed) {
-            // STATO ROSSO (CLOSED)
             config = {
                 title: "Scommesse Chiuse 🔒",
                 subtitle: "Il mercato delle scommesse speciali è chiuso definitivamente",
@@ -87,8 +108,41 @@ export default async function SideBetsPage() {
                 statusLabel: "Mercato Chiuso"
             }
         }
+    } else if (isRound2) {
+        // LOGICA ROUND 2 (SEDICESIMI)
+        if (isInitial) {
+            config = {
+                title: "Seconda Chance in Arrivo ⏳",
+                subtitle: "Preparati per il Round 2. I punti valgono la metà, ma tutto può succedere!",
+                color: "bg-amber-500",
+                showCountdown: true,
+                countdownTarget: openAt,
+                allowVoting: false,
+                statusLabel: "Conto alla rovescia (Round 2)"
+            }
+        } else if (isOpen) {
+            config = {
+                title: "Seconda Chance ✌️",
+                subtitle: "Nuove scommesse aperte! I pronostici di questo round valgono la metà dei punti originali.",
+                color: "bg-emerald-600",
+                showCountdown: false,
+                countdownTarget: closedAt,
+                allowVoting: true,
+                statusLabel: "Mercato Aperto (Round 2)"
+            }
+        } else if (isClosed) {
+            config = {
+                title: "Scommesse Chiuse 🔒",
+                subtitle: "Anche il secondo round di scommesse speciali è terminato.",
+                color: "bg-rose-600",
+                showCountdown: false,
+                countdownTarget: closedAt,
+                allowVoting: false,
+                statusLabel: "Mercato Chiuso"
+            }
+        }
     } else {
-        // STATO ROSSO AUTOMATICO
+        // STATO ROSSO AUTOMATICO (ottavi, quarti, ...)
         config = {
             title: "Scommesse Chiuse 🔒",
             subtitle: "Il torneo è entrato nella fase calda. Le scelte sono definitive.",
@@ -100,14 +154,22 @@ export default async function SideBetsPage() {
         }
     }
 
-    // 1. Recuperiamo le domande
-    const { data: bets } = await supabase.from('side_bets').select('*')
+    // 1. Recuperiamo le domande ordinate per round
+    const { data: allBets } = await supabase.from('side_bets').select('*').order('round', { ascending: true })
 
-    // recuperiamo le risposte esistenti dell'utente
+    // smistamento logico delle domande
+    const round1Bets = allBets?.filter(b => b.round === 1) || []
+    const round2Bets = allBets?.filter(b => b.round === 2) || []
+
+    // recuperiamo le risposte dell'utente
     const { data: existingAnswers } = await supabase
         .from('user_side_bets')
-        .select('side_bet_id, answer, numeric_answer')
+        .select('side_bet_id, answer, numeric_answer, is_correct')
         .eq('user_id', user.id)
+
+    // smistamento logico delle risposte
+    const round1Answers = existingAnswers?.filter(a => round1Bets.some(b => b.id === a.side_bet_id)) || []
+    const round2Answers = existingAnswers?.filter(a => round2Bets.some(b => b.id === a.side_bet_id)) || []
 
     // Recuperiamo TUTTI i dati dei match per estrarre le squadre
     const { data: matches } = await supabase.from('matches').select('*')
@@ -117,8 +179,11 @@ export default async function SideBetsPage() {
         if (m.away_team) teamsMap.set(m.away_team, { name: m.away_team, flag: m.away_flag, tla: m.away_tla })
     })
     const teams = Array.from(teamsMap.values()).sort((a, b) => a.name.localeCompare(b.name))
-    // const totalTeamsFound = teams.length
     
+    // determiniamo quali scommesse passare al form principale in base alla fase
+    const activeBets = isRound2 ? round2Bets : round1Bets
+    const activeAnswers = isRound2 ? round2Answers : round1Answers
+
     return (
         <>
         <RealtimeSettingsListener />
@@ -156,13 +221,32 @@ export default async function SideBetsPage() {
                     </div>
                 )}
 
-                {/* BLOCCO FORM DELLE SIDE BETS */}
-                {!isBlocked && bets && bets.length > 0 ? (
+                {/* QUI ANDRà LA CARD DI RIEPILOGO */}
+                {/* RIEPILOGO ROUND 1 (Sempre visibile se ci sono risposte) */}
+                <SideBetsSummaryCard 
+                    round={1} 
+                    bets={round1Bets} 
+                    answers={round1Answers} 
+                    teams={teams} 
+                />
+
+                {/* RIEPILOGO ROUND 2 (Visibile solo dal Round 2 in poi) */}
+                {(isRound2 || (!isRound1 && !isRound2)) && (
+                    <SideBetsSummaryCard 
+                        round={2} 
+                        bets={round2Bets} 
+                        answers={round2Answers} 
+                        teams={teams} 
+                    />
+                )}
+
+                {/* BLOCCO FORM DELLE SIDE BETS ATTIVE */}
+                {!isBlocked && activeBets && activeBets.length > 0 ? (
                     <SideBetsForm
-                        key={`${settings.current_phase}-${existingAnswers?.length || 0}`} 
-                        bets={bets} 
+                        key={`${settings.current_phase}-${activeAnswers?.length || 0}`} 
+                        bets={activeBets} 
                         teams={teams}
-                        initialAnswers={existingAnswers || []}
+                        initialAnswers={activeAnswers || []}
                         isLocked={!config.allowVoting}
                     />
                 ) : (
