@@ -1,8 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function RankingWidget({ users, currentUserId }: { users: any[], currentUserId: string }) {
+    // Stato per gestire quale tooltip è aperto
+    const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
+
     const sortedUsers = [...users].sort((a, b) => {
         if (b.total_points !== a.total_points) return b.total_points - a.total_points
         if (b.scores_count !== a.scores_count) return b.scores_count - a.scores_count
@@ -34,7 +38,7 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                     // 🛡️ FIX PODIO: index > 2 assicura che il 1°, 2° e 3° non siano mai Indovini
                     const isIndovino = hasPoints && user.scores_count === maxScoresCount && maxScoresCount > 0 && index > 2
 
-                    // Gestione Colore Badge
+                    // Gestione Colore Badge Posizione
                     let badgeColor = "bg-slate-100 text-slate-400"
                     if (hasPoints) {
                         if (index === 0) badgeColor = "bg-amber-400 text-white"
@@ -43,12 +47,6 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                     }
                     if (isIndovino) {
                         badgeColor = "bg-purple-600 text-white shadow-md shadow-purple-200"
-                    }
-
-                    // Gestione Colore Nome
-                    let nameColor = isMe ? 'text-emerald-700' : 'text-slate-700'
-                    if (isIndovino) {
-                        nameColor = 'text-purple-700'
                     }
 
                     return (
@@ -60,9 +58,9 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                                 : 'bg-slate-50 border-slate-100'
                             }`}
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
                                 {/* Blocco Posizione + Freccina */}
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1 shrink-0">
                                     <span className={`w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-black shrink-0 ${badgeColor}`}>
                                         {hasPoints ? rank : '-'}
                                     </span>
@@ -76,30 +74,39 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                                     </div>
                                 </div>
                                 
-                                {/* 🛠️ FIX TOOLTIP: Usiamo 'group' per l'hover CSS senza JavaScript! */}
-                                <div className="relative flex items-center gap-2 cursor-help group">
-                                    <span className={`text-sm truncate font-black transition-colors ${nameColor}`}>
+                                {/* Blocco Nome, Badge "Tu" e Tooltip */}
+                                <div className="relative flex items-center gap-2 min-w-0">
+                                    {/* Pulsante cliccabile per il tooltip */}
+                                    <button 
+                                        onClick={() => setActiveTooltip(activeTooltip === user.id ? null : user.id)}
+                                        onBlur={() => setActiveTooltip(null)}
+                                        className={`text-sm truncate text-left relative focus:outline-none cursor-pointer hover:opacity-80 transition-opacity
+                                            ${isMe ? 'font-black text-emerald-700' : ''}
+                                            ${isIndovino && !isMe ? 'font-black text-purple-700' : ''}
+                                            ${!isMe && !isIndovino ? 'font-bold text-slate-700' : ''}
+                                        `}
+                                    >
                                         {user.username || 'Giocatore'}
-                                    </span>
+
+                                        {/* Il Tooltip vero e proprio */}
+                                        {activeTooltip === user.id && user.full_name && (
+                                            <div className="absolute left-0 top-full mt-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                                                {user.full_name}
+                                                {/* Triangolino in alto */}
+                                                <div className="absolute bottom-full left-4 -mb-[1px] border-[5px] border-transparent border-b-slate-800"></div>
+                                            </div>
+                                        )}
+                                    </button>
 
                                     {isMe && (
                                         <span className="text-[7px] sm:text-[9px] bg-emerald-200 text-emerald-700 px-1 w-fit rounded font-black uppercase shrink-0">
                                             Tu
                                         </span>
                                     )}
-
-                                    {/* Il Tooltip vero e proprio, appare al group-hover */}
-                                    {user.full_name && (
-                                        <div className="absolute left-0 top-full mt-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top">
-                                            {user.full_name}
-                                            {/* Triangolino in alto */}
-                                            <div className="absolute bottom-full left-4 -mb-[1px] border-[5px] border-transparent border-b-slate-800"></div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 shrink-0 ml-2">
                                 <span className={`font-black text-sm ${isMe ? 'text-emerald-600' : 'text-slate-800'}`}>
                                     {user.total_points}
                                 </span>
