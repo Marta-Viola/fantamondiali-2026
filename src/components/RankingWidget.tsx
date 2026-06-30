@@ -1,11 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function RankingWidget({ users, currentUserId }: { users: any[], currentUserId: string }) {
     // Stato per gestire quale tooltip è aperto
     const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
+
+    // 🛠️ FIX DEFINITIVO MOBILE: Chiude il tooltip se tocchi fuori
+    useEffect(() => {
+        const handleClickOutside = () => setActiveTooltip(null)
+        // Ascolta ogni tocco/click sullo schermo
+        document.addEventListener('click', handleClickOutside)
+        return () => document.removeEventListener('click', handleClickOutside)
+    }, [])
 
     const sortedUsers = [...users].sort((a, b) => {
         if (b.total_points !== a.total_points) return b.total_points - a.total_points
@@ -49,6 +57,12 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                         badgeColor = "bg-purple-600 text-white shadow-md shadow-purple-200"
                     }
 
+                    // Gestione Colore Nome
+                    let nameColor = isMe ? 'text-emerald-700' : 'text-slate-700'
+                    if (isIndovino) {
+                        nameColor = 'text-purple-700'
+                    }
+
                     return (
                         <div
                             key={user.id}
@@ -76,11 +90,13 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
                                 
                                 {/* Blocco Nome, Badge "Tu" e Tooltip */}
                                 <div className="relative flex items-center gap-2 min-w-0">
-                                    {/* Pulsante cliccabile per il tooltip */}
+                                    {/* 🛠️ FIX MOBILE: Tolto onBlur, aggiunto stopPropagation su onClick */}
                                     <button 
-                                        onClick={() => setActiveTooltip(activeTooltip === user.id ? null : user.id)}
-                                        onBlur={() => setActiveTooltip(null)}
-                                        className={`text-sm truncate text-left relative focus:outline-none cursor-pointer hover:opacity-80 transition-opacity
+                                        onClick={(e) => {
+                                            e.stopPropagation() // <--- MAGIA: Impedisce che il tocco arrivi al document e chiuda subito il tooltip
+                                            setActiveTooltip(activeTooltip === user.id ? null : user.id)
+                                        }}
+                                        className={`text-sm truncate text-left relative focus:outline-none cursor-pointer transition-opacity
                                             ${isMe ? 'font-black text-emerald-700' : ''}
                                             ${isIndovino && !isMe ? 'font-black text-purple-700' : ''}
                                             ${!isMe && !isIndovino ? 'font-bold text-slate-700' : ''}
@@ -90,7 +106,10 @@ export default function RankingWidget({ users, currentUserId }: { users: any[], 
 
                                         {/* Il Tooltip vero e proprio */}
                                         {activeTooltip === user.id && user.full_name && (
-                                            <div className="absolute left-0 top-full mt-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                                            <div 
+                                                onClick={(e) => e.stopPropagation()} // Impedisce che toccando il tooltip stesso si chiuda
+                                                className="absolute left-0 top-full mt-1 z-50 bg-slate-800 text-white text-[10px] sm:text-xs font-bold py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200"
+                                            >
                                                 {user.full_name}
                                                 {/* Triangolino in alto */}
                                                 <div className="absolute bottom-full left-4 -mb-[1px] border-[5px] border-transparent border-b-slate-800"></div>
