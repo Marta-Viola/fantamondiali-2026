@@ -31,31 +31,42 @@ export async function syncMatches() {
 
         if (!response.ok) {
             console.error('Errore API:', data)
-            return { success: false, error: data.message || 'Errore nel recupero dati' }
+            return { success: false, error: data.message || 'Errore nel recupero dati API' }
         }
 
         const matches = data.matches
+
+        // 🛡️ FIX SICUREZZA: Controlliamo che la risposta dell'API contenga effettivamente l'array matches
+        if (!matches || !Array.isArray(matches)) {
+            return { success: false, error: 'Formato dati API non valido' }
+        }
 
         // 2. Filtriamo e Prepariamo i dati per Supabase
         const formattedMatches = matches
             .filter((m: any) => m.homeTeam?.name && m.awayTeam?.name)   // SALTA le partite con nomi mancanti
             .map((m: any) => {
-                const apiStatus = m.status.toLowerCase()
+                const apiStatus = m.status?.toLowerCase() || ''
                 const normalizedStatus = statusMapper[apiStatus] || apiStatus
+
+                // 🎯 FIX RISULTATO: Prendiamo il regularTime (prima dei rigori/supplementari).
+                // Mettiamo in cascata (??) un fallback sul fullTime nel caso l'API, per partite non ancora iniziate, 
+                // non esponga proprio l'oggetto regularTime.
+                const homeGoals = m.score?.regularTime?.home ?? m.score?.fullTime?.home ?? null
+                const awayGoals = m.score?.regularTime?.away ?? m.score?.fullTime?.away ?? null
 
                 return {
                     id: m.id,
                     home_team: m.homeTeam.name,
                     away_team: m.awayTeam.name,
-                    home_tla: m.homeTeam.tla,
-                    away_tla: m.awayTeam.tla,
+                    home_tla: m.homeTeam.tla || null,
+                    away_tla: m.awayTeam.tla || null,
                     home_flag: m.homeTeam.crest || null,
                     away_flag: m.awayTeam.crest || null,
                     match_time: m.utcDate,
                     stage: m.stage,
                     status: normalizedStatus,
-                    home_score: m.score.fullTime.home ?? null,
-                    away_score: m.score.fullTime.away ?? null,
+                    home_score: homeGoals,
+                    away_score: awayGoals,
                 }
             })
 
@@ -63,7 +74,7 @@ export async function syncMatches() {
             return { success: false, error: "Nessuna partita valida trovata." }
         }
 
-        // 3. Salviamo su Supabase (Upsert: se esiste aggiorna, se no inseerisce)
+        // 3. Salviamo su Supabase (Upsert: se esiste aggiorna, se no inserisce)
         const { error: matchError } = await supabase
             .from('matches')
             .upsert(formattedMatches, { onConflict: 'id' })
