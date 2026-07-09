@@ -20,11 +20,10 @@ export async function syncMatches() {
         throw new Error('API Key mancante nel file .env.local')
     }
 
-    // 1. Chiamiamo l'API (WC = World Cup)
     try {
         const response = await fetch('https://api.football-data.org/v4/competitions/WC/matches', {
             headers: { 'X-Auth-Token': apiKey },
-            next: { revalidate: 0 } // non vogliamo cache per questa operazione
+            next: { revalidate: 0 } 
         })
 
         const data = await response.json()
@@ -36,23 +35,29 @@ export async function syncMatches() {
 
         const matches = data.matches
 
-        // 🛡️ FIX SICUREZZA: Controlliamo che la risposta dell'API contenga effettivamente l'array matches
         if (!matches || !Array.isArray(matches)) {
             return { success: false, error: 'Formato dati API non valido' }
         }
 
-        // 2. Filtriamo e Prepariamo i dati per Supabase
         const formattedMatches = matches
-            .filter((m: any) => m.homeTeam?.name && m.awayTeam?.name)   // SALTA le partite con nomi mancanti
+            .filter((m: any) => m.homeTeam?.name && m.awayTeam?.name)
             .map((m: any) => {
                 const apiStatus = m.status?.toLowerCase() || ''
                 const normalizedStatus = statusMapper[apiStatus] || apiStatus
 
-                // 🎯 FIX RISULTATO: Prendiamo il regularTime (prima dei rigori/supplementari).
-                // Mettiamo in cascata (??) un fallback sul fullTime nel caso l'API, per partite non ancora iniziate, 
-                // non esponga proprio l'oggetto regularTime.
-                const homeGoals = m.score?.regularTime?.home ?? m.score?.fullTime?.home ?? null
-                const awayGoals = m.score?.regularTime?.away ?? m.score?.fullTime?.away ?? null
+                // 🎯 FIX RISULTATO (modificato in 'let')
+                let homeGoals = m.score?.regularTime?.home ?? m.score?.fullTime?.home ?? null
+                let awayGoals = m.score?.regularTime?.away ?? m.score?.fullTime?.away ?? null
+
+                // 🛡️ BLOCCO DI SICUREZZA: Congela il punteggio se siamo ai supplementari ma manca il regularTime
+                if (
+                    m.score?.duration && 
+                    m.score?.duration !== 'REGULAR' && 
+                    m.score?.regularTime?.home == null
+                ) {
+                    homeGoals = null
+                    awayGoals = null
+                }
 
                 return {
                     id: m.id,
@@ -74,7 +79,6 @@ export async function syncMatches() {
             return { success: false, error: "Nessuna partita valida trovata." }
         }
 
-        // 3. Salviamo su Supabase (Upsert: se esiste aggiorna, se no inserisce)
         const { error: matchError } = await supabase
             .from('matches')
             .upsert(formattedMatches, { onConflict: 'id' })
@@ -84,7 +88,6 @@ export async function syncMatches() {
             return { success: false, error: matchError.message }
         }
 
-        // aggiorna la data dell'ultima sincro
         const { error: settingsError } = await supabase
             .from('app_settings')
             .update({ last_sync_at: new Date().toISOString() })
@@ -101,7 +104,6 @@ export async function syncMatches() {
             return { success: false, error: 'Partite aggiornate ma calcolo punti fallito'}
         }
 
-        // REVALIDATION
         revalidatePath('/')
         revalidatePath('/classifica')
         revalidatePath('/pronostici')
