@@ -55,20 +55,49 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
         scorer: getTargetPoints(25),
     }
 
-    const TeamBadge = ({ teamName }: { teamName: string }) => {
+    // 🎯 NUOVA LOGICA: Calcolatore dinamico dei punti correnti (specchio della funzione SQL)
+    const getCorrectCount = (ansArray: Answer[]) => ansArray.filter(a => a.is_correct === true).length;
+
+    // Semifinali: 15 pt a squadra (R1) o 7 (R2) + Bonus en plein (10 o 5)
+    const semiCorrectCount = getCorrectCount(semiAnswers);
+    const semiBasePts = round === 1 ? 15 : 7;
+    const semiBonusPts = round === 1 ? 10 : 5;
+    const currentSemiPts = (semiCorrectCount * semiBasePts) + (semiCorrectCount === 4 ? semiBonusPts : 0);
+
+    // Finali: 25 pt a squadra (R1) o 12 (R2)
+    const finalCorrectCount = getCorrectCount(finalAnswers);
+    const currentFinalPts = finalCorrectCount * (round === 1 ? 25 : 12);
+
+    // Esito Esatto: 15 pt (R1) o 7 (R2)
+    const currentResultPts = resultAnswer?.is_correct ? maxPoints.result : 0;
+
+    // Vincitrice: 35 pt (R1) o 17 (R2)
+    const currentWinnerPts = winnerAnswer?.is_correct ? maxPoints.winner : 0;
+
+    // Capocannoniere: SQL dà punti base per il nome + bonus per i gol.
+    // Dato che il frontend al momento legge solo un booleano (is_correct) per l'intera scommessa, 
+    // mostriamo il punteggio massimo della categoria se flaggato corretto.
+    const currentScorerPts = scorerAnswer?.is_correct ? maxPoints.scorer : 0;
+
+
+    const TeamBadge = ({ teamName, isCorrect }: { teamName: string, isCorrect?: boolean | null }) => {
         if (!teamName) return <span className="text-slate-300">-</span>;
         
         const teamData = teams.find(t => t.name.toLowerCase() === teamName.toLowerCase());
         
+        // Colore dinamico se la risposta è stata valutata giusta
+        const bgClass = isCorrect ? 'bg-emerald-100 border-emerald-300' : 'bg-slate-100 border-slate-200';
+        const textClass = isCorrect ? 'text-emerald-800' : 'text-slate-700';
+
         if (teamData) {
             return (
-                <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg shrink-0">
+                <div className={`flex items-center gap-1.5 border px-2 py-1 rounded-lg shrink-0 ${bgClass}`}>
                     <img src={teamData.flag} alt="" className="w-4 h-3 object-cover rounded-[2px] shadow-sm" />
-                    <span className="text-[11px] font-black text-slate-700 tracking-wider">{teamData.tla}</span>
+                    <span className={`text-[11px] font-black tracking-wider ${textClass}`}>{teamData.tla}</span>
                 </div>
             );
         }
-        return <div className="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded-lg text-slate-600">{teamName}</div>;
+        return <div className={`text-[10px] font-bold px-2 py-1 rounded-lg ${bgClass} ${textClass}`}>{teamName}</div>;
     }
 
     const SummaryRow = ({ title, maxPt, currentPt = 0, children }: any) => (
@@ -76,7 +105,7 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
             <div className="flex justify-between items-center w-full sm:w-auto shrink-0">
                 <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{title}</span>
                 <span className="sm:hidden text-[10px] font-black text-slate-300 bg-slate-50 px-2 py-0.5 rounded-full">
-                    <span className={currentPt > 0 ? 'text-emerald-500' : ''}>{currentPt}</span> / {maxPt} PT
+                    <span className={currentPt > 0 ? 'text-emerald-500' : ''}>{Math.floor(currentPt)}</span> / {maxPt} PT
                 </span>
             </div>
             
@@ -85,7 +114,7 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
             </div>
 
             <div className="hidden sm:block text-[10px] font-black text-slate-300 bg-slate-50 px-2 py-0.5 rounded-full shrink-0">
-                <span className={currentPt > 0 ? 'text-emerald-500' : ''}>{currentPt}</span> / {maxPt} PT
+                <span className={currentPt > 0 ? 'text-emerald-500' : ''}>{Math.floor(currentPt)}</span> / {maxPt} PT
             </div>
         </div>
     )
@@ -105,23 +134,22 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
             <div className="space-y-1">
                 {/* SEMIFINALISTE */}
                 {semiAnswers.length > 0 && (
-                    <SummaryRow title="Semifinaliste" maxPt={maxPoints.semi} currentPt={0}>
-                        {semiAnswers.map(a => <TeamBadge key={a.side_bet_id} teamName={a.answer} />)}
+                    <SummaryRow title="Semifinaliste" maxPt={maxPoints.semi} currentPt={currentSemiPts}>
+                        {semiAnswers.map(a => <TeamBadge key={a.side_bet_id} teamName={a.answer} isCorrect={a.is_correct} />)}
                     </SummaryRow>
                 )}
 
                 {/* FINALISTE */}
                 {finalAnswers.length > 0 && (
-                    <SummaryRow title="Finaliste" maxPt={maxPoints.final} currentPt={0}>
-                        {finalAnswers.map(a => <TeamBadge key={a.side_bet_id} teamName={a.answer} />)}
+                    <SummaryRow title="Finaliste" maxPt={maxPoints.final} currentPt={currentFinalPts}>
+                        {finalAnswers.map(a => <TeamBadge key={a.side_bet_id} teamName={a.answer} isCorrect={a.is_correct} />)}
                     </SummaryRow>
                 )}
 
                 {/* RISULTATO ESATTO */}
-                {/* 🛠️ FIX: Se resultAnswer esiste nel DB forziamo la visualizzazione, con fallback a "0-0" se la stringa è vuota/rotta */}
                 {resultAnswer && (
-                    <SummaryRow title="Ris. Esatto (Finale)" maxPt={maxPoints.result} currentPt={0}>
-                        <div className="text-xs font-black text-slate-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg tracking-widest">
+                    <SummaryRow title="Ris. Esatto (Finale)" maxPt={maxPoints.result} currentPt={currentResultPts}>
+                        <div className={`text-xs font-black px-3 py-1 rounded-lg tracking-widest border ${resultAnswer.is_correct ? 'bg-emerald-100 border-emerald-300 text-emerald-800' : 'bg-emerald-50 border-emerald-100 text-slate-700'}`}>
                             {resultAnswer.answer || "0-0"}
                         </div>
                     </SummaryRow>
@@ -129,17 +157,17 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
 
                 {/* VINCITRICE */}
                 {winnerAnswer && (
-                    <SummaryRow title="Vincitrice" maxPt={maxPoints.winner} currentPt={0}>
-                        <TeamBadge teamName={winnerAnswer.answer} />
+                    <SummaryRow title="Vincitrice" maxPt={maxPoints.winner} currentPt={currentWinnerPts}>
+                        <TeamBadge teamName={winnerAnswer.answer} isCorrect={winnerAnswer.is_correct} />
                     </SummaryRow>
                 )}
 
                 {/* CAPOCANNONIERE */}
                 {scorerAnswer && (
-                    <SummaryRow title="Capocannoniere" maxPt={maxPoints.scorer} currentPt={0}>
-                        <div className="flex items-baseline gap-1.5 bg-amber-50 border border-amber-100 px-3 py-1 rounded-lg">
-                            <span className="text-xs font-black text-amber-900">{scorerAnswer.answer || "-"}</span>
-                            <span className="text-[10px] font-bold text-amber-600">({scorerAnswer.numeric_answer || 0} gol)</span>
+                    <SummaryRow title="Capocannoniere" maxPt={maxPoints.scorer} currentPt={currentScorerPts}>
+                        <div className={`flex items-baseline gap-1.5 px-3 py-1 rounded-lg border ${scorerAnswer.is_correct ? 'bg-emerald-100 border-emerald-300' : 'bg-amber-50 border-amber-100'}`}>
+                            <span className={`text-xs font-black ${scorerAnswer.is_correct ? 'text-emerald-800' : 'text-amber-900'}`}>{scorerAnswer.answer || "-"}</span>
+                            <span className={`text-[10px] font-bold ${scorerAnswer.is_correct ? 'text-emerald-600' : 'text-amber-600'}`}>({scorerAnswer.numeric_answer || 0} gol)</span>
                         </div>
                     </SummaryRow>
                 )}
