@@ -58,15 +58,19 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
     // 🎯 NUOVA LOGICA: Calcolatore dinamico dei punti correnti (specchio della funzione SQL)
     const getCorrectCount = (ansArray: Answer[]) => ansArray.filter(a => a.is_correct === true).length;
 
-    // Semifinali: 15 pt a squadra (R1) o 7 (R2) + Bonus en plein (10 o 5)
+    // Semifinali: 15 pt a squadra (R1) o 7 (R2) + Bonus en plein: 10 (R1) o 7 (R2 - per recuperare arrotondamento)
     const semiCorrectCount = getCorrectCount(semiAnswers);
     const semiBasePts = round === 1 ? 15 : 7;
-    const semiBonusPts = round === 1 ? 10 : 5;
+    const semiBonusPts = round === 1 ? 10 : 7;  // FIX: da 5 a 7 punti
     const currentSemiPts = (semiCorrectCount * semiBasePts) + (semiCorrectCount === 4 ? semiBonusPts : 0);
 
     // Finali: 25 pt a squadra (R1) o 12 (R2)
     const finalCorrectCount = getCorrectCount(finalAnswers);
-    const currentFinalPts = finalCorrectCount * (round === 1 ? 25 : 12);
+    let currentFinalPts = finalCorrectCount * (round === 1 ? 25 : 12);
+    // FIX: recupero di 1 punto se ne azzecca due nel Round 2 (12+12 = 24 + 1 = 25)
+    if (round == 2 && finalCorrectCount == 2) {
+        currentFinalPts += 1;
+    }
 
     // Esito Esatto: 15 pt (R1) o 7 (R2)
     const currentResultPts = resultAnswer?.is_correct ? maxPoints.result : 0;
