@@ -81,8 +81,20 @@ export default function SideBetsSummaryCard({ round, bets, answers, teams }: Sid
     // Capocannoniere: SQL dà punti base per il nome + bonus per i gol.
     // Dato che il frontend al momento legge solo un booleano (is_correct) per l'intera scommessa, 
     // mostriamo il punteggio massimo della categoria se flaggato corretto.
-    const currentScorerPts = scorerAnswer?.is_correct ? maxPoints.scorer : 0;
+    // const currentScorerPts = scorerAnswer?.is_correct ? maxPoints.scorer : 0;
+    // Capocannoniere: Logica separata per Base (Nome) e Bonus (Gol)
+    let currentScorerPts = 0;
+    if (scorerAnswer?.is_correct) {
+        // Punti base se il nome è corretto (is_correct = true dal DB)
+        const scorerBasePts = round === 1 ? 10 : 5; 
+        currentScorerPts += scorerBasePts;
 
+        // Punteggio Bonus ESCLUSIVO se ha azzeccato i 10 gol esatti
+        if (scorerAnswer.numeric_answer === 10) {
+            const scorerBonusPts = round === 1 ? 15 : 7;
+            currentScorerPts += scorerBonusPts;
+        }
+    }
 
     const TeamBadge = ({ teamName, isCorrect }: { teamName: string, isCorrect?: boolean | null }) => {
         if (!teamName) return <span className="text-slate-300">-</span>;
