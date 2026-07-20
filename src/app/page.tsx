@@ -10,6 +10,7 @@ import RealtimeSettingsListener from '@/components/RealtimeSettingsListener'
 import Countdown from '@/components/ui/Countdown'
 import { PHASE_SCHEDULE } from '@/constants/phases'
 import LogoutButton from '@/components/ui/LogoutButton'
+import DonationCard from '@/components/DonationCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -224,6 +225,11 @@ export default async function Home() {
           )}
 
         </div>
+
+        {/* pagami! */}
+        <section>
+          <DonationCard />
+        </section>
 
         {/* Widget classifica */}
         <section>

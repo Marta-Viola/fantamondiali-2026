@@ -97,3 +97,24 @@ export async function updateSystemStatus(
 
     return { success: true }
 }
+
+export async function triggerSideBetsCalculation() {
+    try {
+        // ... qui prossimamente le VERE query a supabase
+
+        await new Promise(resolve => setTimeout(resolve, 1500))
+
+        const fakeLogs = [
+            { username: 'francesca', points: 0 },
+            { username: 'marco_99', points: 0 },
+            { username: 'luca_bomber', points: 0 },
+            { username: 'utente_misterioso', points: 0 }
+        ]
+
+        return { success: true, data: fakeLogs }
+
+    } catch (error: any) {
+        console.error("ERRORE CALCOLO SIDE BETS:", error.message)
+        return { success: false, error: error.message }
+    }
+}

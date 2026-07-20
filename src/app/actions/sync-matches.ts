@@ -20,42 +20,58 @@ export async function syncMatches() {
         throw new Error('API Key mancante nel file .env.local')
     }
 
-    // 1. Chiamiamo l'API (WC = World Cup)
     try {
         const response = await fetch('https://api.football-data.org/v4/competitions/WC/matches', {
             headers: { 'X-Auth-Token': apiKey },
-            next: { revalidate: 0 } // non vogliamo cache per questa operazione
+            next: { revalidate: 0 } 
         })
 
         const data = await response.json()
 
         if (!response.ok) {
             console.error('Errore API:', data)
-            return { success: false, error: data.message || 'Errore nel recupero dati' }
+            return { success: false, error: data.message || 'Errore nel recupero dati API' }
         }
 
         const matches = data.matches
 
-        // 2. Filtriamo e Prepariamo i dati per Supabase
+        if (!matches || !Array.isArray(matches)) {
+            return { success: false, error: 'Formato dati API non valido' }
+        }
+
         const formattedMatches = matches
-            .filter((m: any) => m.homeTeam?.name && m.awayTeam?.name)   // SALTA le partite con nomi mancanti
+            .filter((m: any) => m.homeTeam?.name && m.awayTeam?.name)
             .map((m: any) => {
-                const apiStatus = m.status.toLowerCase()
+                const apiStatus = m.status?.toLowerCase() || ''
                 const normalizedStatus = statusMapper[apiStatus] || apiStatus
+
+                // 🎯 FIX RISULTATO (modificato in 'let')
+                let homeGoals = m.score?.regularTime?.home ?? m.score?.fullTime?.home ?? null
+                let awayGoals = m.score?.regularTime?.away ?? m.score?.fullTime?.away ?? null
+
+                // 🛡️ BLOCCO DI SICUREZZA: Congela il punteggio se siamo ai supplementari ma manca il regularTime
+                if (
+                    m.score?.duration && 
+                    m.score?.duration !== 'REGULAR' && 
+                    m.score?.regularTime?.home == null
+                ) {
+                    homeGoals = null
+                    awayGoals = null
+                }
 
                 return {
                     id: m.id,
                     home_team: m.homeTeam.name,
                     away_team: m.awayTeam.name,
-                    home_tla: m.homeTeam.tla,
-                    away_tla: m.awayTeam.tla,
+                    home_tla: m.homeTeam.tla || null,
+                    away_tla: m.awayTeam.tla || null,
                     home_flag: m.homeTeam.crest || null,
                     away_flag: m.awayTeam.crest || null,
                     match_time: m.utcDate,
                     stage: m.stage,
                     status: normalizedStatus,
-                    home_score: m.score.fullTime.home ?? null,
-                    away_score: m.score.fullTime.away ?? null,
+                    home_score: homeGoals,
+                    away_score: awayGoals,
                 }
             })
 
@@ -63,7 +79,6 @@ export async function syncMatches() {
             return { success: false, error: "Nessuna partita valida trovata." }
         }
 
-        // 3. Salviamo su Supabase (Upsert: se esiste aggiorna, se no inseerisce)
         const { error: matchError } = await supabase
             .from('matches')
             .upsert(formattedMatches, { onConflict: 'id' })
@@ -73,7 +88,6 @@ export async function syncMatches() {
             return { success: false, error: matchError.message }
         }
 
-        // aggiorna la data dell'ultima sincro
         const { error: settingsError } = await supabase
             .from('app_settings')
             .update({ last_sync_at: new Date().toISOString() })
@@ -90,7 +104,6 @@ export async function syncMatches() {
             return { success: false, error: 'Partite aggiornate ma calcolo punti fallito'}
         }
 
-        // REVALIDATION
         revalidatePath('/')
         revalidatePath('/classifica')
         revalidatePath('/pronostici')
